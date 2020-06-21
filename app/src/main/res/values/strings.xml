@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">Online-Anytime</string>
+
+<!--    side_menu-->
+    <string name="course"> My courses</string>
+    <string name="setting">Setting</string>
+    <string name="logout">Log out</string>
+    <string name="header_title">Dashboard</string>
+
+<!--    login page-->
+    <string name="email_hint">Email address</string>
+    <string name="pass_hint">Password</string>
+    <string name="login_button">SIGN IN</string>
+    <string name="login_forget">Forget password?</string>
+
+<!--    forget page-->
+    <string name="forget_button">FORGOT</string>
+    <string name="forget_signin">Sign in</string>
+    <string name="forget_display">We will send the link for reset password to your email</string>
+</resources>
