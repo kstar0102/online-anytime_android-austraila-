@@ -27,6 +27,8 @@
         <activity android:name=".ForgetActivity"/>
         <activity android:name=".MainActivity"></activity>
         <activity android:name=".EachItemActivity"></activity>
+        <activity android:name=".G1_RiiRis301D.G1DetailActivity"/>
+<!--        <activity android:name=""-->
         <activity android:name=".SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

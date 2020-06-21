@@ -1,4 +1,4 @@
-package com.austraila.form;
+package com.austraila.form.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,11 +8,12 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.austraila.form.R;
 import com.austraila.form.model.Listmodel;
 
 import java.util.ArrayList;
 
-class CustomAdapter extends ArrayAdapter {
+public class CustomAdapter extends ArrayAdapter {
     ArrayList listItem = new ArrayList<>();
 
     public CustomAdapter(Context context, int textViewResourceId, ArrayList objects) {

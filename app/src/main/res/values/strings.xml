@@ -17,4 +17,7 @@
     <string name="forget_button">FORGOT</string>
     <string name="forget_signin">Sign in</string>
     <string name="forget_display">We will send the link for reset password to your email</string>
+
+<!--    G1 - RIIRIS301D (Practical Assessment) Copy-->
+    <string name="G1_title">G1 - RIIRIS301D (Practical Assessment) Copy</string>
 </resources>

@@ -14,6 +14,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.austraila.form.G1_RiiRis301D.G1DetailActivity;
+import com.austraila.form.adapter.CustomAdapter;
 import com.austraila.form.model.Listmodel;
 import com.google.android.material.navigation.NavigationView;
 
@@ -55,11 +57,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent,
                                     View v, int position, long id){
-                // Send intent to SingleViewActivity
-                Intent i = new Intent(MainActivity.this, EachItemActivity.class);
-                // Pass image index
-                i.putExtra("id", position);
-                startActivity(i);
+
+                Toast.makeText(MainActivity.this, "myPos "+position, Toast.LENGTH_LONG).show();
+                if(position == 0){
+                    Intent intent = new Intent(MainActivity.this, G1DetailActivity.class);
+                    startActivity(intent);
+                }
             }
         });
 
