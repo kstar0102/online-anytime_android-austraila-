@@ -1,9 +1,8 @@
-package com.austraila.form;
+package com.austraila.online_anytime.activitys;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,6 +18,8 @@ import android.webkit.WebViewClient;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.austraila.online_anytime.R;
 
 public class EachItemActivity extends AppCompatActivity {
 

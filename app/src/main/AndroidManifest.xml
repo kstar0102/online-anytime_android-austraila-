@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.austraila.form">
+    package="com.austraila.online_anytime">
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true" />
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -12,7 +16,7 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.ACCESS_DOWNLOAD_MANAGER"/>
+    <uses-permission android:name="android.permission.ACCESS_DOWNLOAD_MANAGER" />
 
     <application
         android:allowBackup="true"
@@ -20,16 +24,17 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:usesCleartextTraffic="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true">
 
-        <activity android:name=".LoginActivity"></activity>
-        <activity android:name=".ForgetActivity"/>
-        <activity android:name=".MainActivity"></activity>
-        <activity android:name=".EachItemActivity"></activity>
-        <activity android:name=".G1_RiiRis301D.G1DetailActivity"/>
-<!--        <activity android:name=""-->
-        <activity android:name=".SplashActivity">
+        <activity android:name=".activitys.LoginActivity" />
+        <activity android:name=".activitys.ForgetActivity" />
+        <activity android:name=".activitys.MainActivity" />
+        <activity android:name=".activitys.EachItemActivity" />
+        <activity android:name=".activitys.G1_RiiRis301D.G1UntitleActivity" />
+        <activity android:name=".activitys.FormActivity" />
+        <activity android:name=".activitys.cameraActivity.CameraActivity" />
+        <activity android:name=".activitys.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -1,10 +1,12 @@
-package com.austraila.form;
+package com.austraila.online_anytime.activitys;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.austraila.online_anytime.R;
 
 public class ForgetActivity extends AppCompatActivity {
     @Override

@@ -1,4 +1,4 @@
-package com.austraila.form;
+package com.austraila.online_anytime.activitys;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,12 +11,13 @@ import android.widget.SearchView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.UiThread;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import com.austraila.form.G1_RiiRis301D.G1DetailActivity;
-import com.austraila.form.adapter.CustomAdapter;
-import com.austraila.form.model.Listmodel;
+import com.austraila.online_anytime.R;
+import com.austraila.online_anytime.adapter.CustomAdapter;
+import com.austraila.online_anytime.model.Listmodel;
 import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
@@ -39,17 +40,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         listView = findViewById(R.id.mainListView);
 
-        Listitem.add(new Listmodel("G1-RIIRIS301D(Practical Assessment)Copy"));
-        Listitem.add(new Listmodel("Enrolment Form"));
-        Listitem.add(new Listmodel("Working at Heights - Enrolment form"));
-        Listitem.add(new Listmodel("G2 - RIIRIS402D (Practical Assessment)"));
-        Listitem.add(new Listmodel("My simple test form"));
-        Listitem.add(new Listmodel("MyFileupload"));
-        Listitem.add(new Listmodel("MyTestForm"));
-        Listitem.add(new Listmodel("Theory Assessment Cover Page"));
-        Listitem.add(new Listmodel("Confirmation of Student Contact Visit"));
-        Listitem.add(new Listmodel("Enter and work in confined spaces - 2nd Assessment"));
-        Listitem.add(new Listmodel("Enter and work in confined spaces - 1st Assessment"));
+        Listitem.add(new Listmodel("Test Form element"));
 
         CustomAdapter myAdapter=new CustomAdapter(MainActivity.this, R.layout.mainlist_item, Listitem);
         listView.setAdapter(myAdapter);
@@ -60,7 +51,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 Toast.makeText(MainActivity.this, "myPos "+position, Toast.LENGTH_LONG).show();
                 if(position == 0){
-                    Intent intent = new Intent(MainActivity.this, G1DetailActivity.class);
+                    Intent intent = new Intent(MainActivity.this, FormActivity.class);
                     startActivity(intent);
                 }
             }
