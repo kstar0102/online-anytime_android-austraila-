@@ -22,7 +22,6 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
@@ -31,7 +30,6 @@
         <activity android:name=".activitys.ForgetActivity" />
         <activity android:name=".activitys.MainActivity" />
         <activity android:name=".activitys.EachItemActivity" />
-        <activity android:name=".activitys.G1_RiiRis301D.G1UntitleActivity" />
         <activity android:name=".activitys.FormActivity" />
         <activity android:name=".activitys.cameraActivity.CameraActivity" />
         <activity android:name=".activitys.SplashActivity">

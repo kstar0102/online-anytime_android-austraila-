@@ -29,7 +29,9 @@
             android:layout_marginTop="30dp"
             android:layout_marginLeft="30dp"
             android:layout_marginRight="20dp"
+            android:padding="5dp"
             android:layout_height="40dp"
+            android:background="@drawable/textview_border"
             android:hint="@string/email_hint"
             android:layout_gravity="center"/>
         <EditText
@@ -37,8 +39,11 @@
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:layout_marginTop="20dp"
+            android:padding="5dp"
+            android:background="@drawable/textview_border"
             android:layout_marginLeft="30dp"
             android:layout_marginRight="20dp"
+            android:inputType="textPassword"
             android:hint="@string/pass_hint"
             android:layout_gravity="center"/>
 
@@ -48,7 +53,7 @@
             android:layout_height="40dp"
             android:layout_marginLeft="40dp"
             android:layout_marginTop="30dp"
-            android:layout_marginRight="30dp"
+            android:layout_marginRight="20dp"
             android:background="@color/colorBackground"
             android:text="@string/login_button"
             android:textColor="@android:color/white"
