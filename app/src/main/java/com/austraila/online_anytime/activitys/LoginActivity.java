@@ -1,11 +1,9 @@
 package com.austraila.online_anytime.activitys;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.ContentValues;
 import android.content.Intent;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
@@ -14,14 +12,29 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.austraila.online_anytime.Common.Common;
 import com.austraila.online_anytime.LocalManage.DatabaseHelper;
 import com.austraila.online_anytime.R;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-public class LoginActivity extends AppCompatActivity {
+import java.util.HashMap;
+import java.util.Map;
+
+public class LoginActivity extends AppCompatActivity{
     private SQLiteDatabase db;
     private SQLiteOpenHelper openHelper;
     EditText email, pass;
     Button loginBtn;
+    String Email, Pass;
+    RequestQueue queue;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,7 +43,6 @@ public class LoginActivity extends AppCompatActivity {
 
         openHelper = new DatabaseHelper(this);
         db = openHelper.getWritableDatabase();
-        insertData("1","1");
 
         email = findViewById(R.id.login_email);
         pass = findViewById(R.id.login_pass);
@@ -39,31 +51,53 @@ public class LoginActivity extends AppCompatActivity {
         loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String Email = email.getText().toString().trim();
-                String password = pass.getText().toString().trim();
-                if (Email.isEmpty() || password.isEmpty()) {
+                Email = email.getText().toString().trim();
+                Pass = pass.getText().toString().trim();
+                if (Email.isEmpty() || Pass.isEmpty()) {
                     Toast.makeText(LoginActivity.this, "Enter your Email and Password to login", Toast.LENGTH_SHORT).show();
                     return;
                 }else {
-                    Cursor cursor = db.rawQuery("SELECT *FROM " + DatabaseHelper.TABLE_NAME + " WHERE " + DatabaseHelper.COL_2 + "=? AND " + DatabaseHelper.COL_2 + "=?", new String[]{Email, password});
-                    if (cursor != null) {
-                        if (cursor.getCount() > 0) {
-                            startActivity(new Intent(LoginActivity.this, MainActivity.class));
-                            Toast.makeText(getApplicationContext(), "Login sucess", Toast.LENGTH_SHORT).show();
+//                    String url = "http://192.168.107.90:89/login?api_key=54d0a2c6b96b514cb47c3645714f7ce8";
+                    String url = Common.getInstance().getBaseURL() + Common.getInstance().getApiKey();
+                    StringRequest postRequest = new StringRequest(Request.Method.POST, url,
+                            new Response.Listener<String>() {
+                                @Override
+                                public void onResponse(String response) {
+                                    System.out.println(response);
+                                    JSONObject jsonObject = null;
+                                    try {
+                                        jsonObject = new JSONObject(response);
+                                        String result = jsonObject.getString("success");
+                                        if (result.equals("true")){
+                                            insertData(Email, Pass);
+                                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                            startActivity(intent);
+                                        } else {
+                                            Toast.makeText(LoginActivity.this, "Oops, can't login! please try to login again.", Toast.LENGTH_LONG).show();
+                                        }
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            },
+                            new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    System.out.println(error);
+                                    Toast.makeText(LoginActivity.this, "It is currently offline.", Toast.LENGTH_LONG).show();
+                                }
+                            }){
+                        @Override
+                        protected Map<String, String> getParams()
+                        {
+                            Map<String, String> params = new HashMap<String, String>();
+                            params.put("email", Email);
+                            params.put("password", Pass);
+                            return params;
                         }
-                        else {
-                            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LoginActivity.this);
-                            // set title
-                            alertDialogBuilder.setTitle("エラー");
-                            // set dialog message
-                            alertDialogBuilder.setMessage("ログインに失敗しました。メールアドレスとパスワードを再入力し、再度ログインをお試しください。");
-                            // create alert dialog
-                            AlertDialog alertDialog = alertDialogBuilder.create();
-                            // show it
-                            alertDialog.show();
-                            Toast.makeText(getApplicationContext(), "Login error", Toast.LENGTH_SHORT).show();
-                        }
-                    }
+                    };
+                    queue = Volley.newRequestQueue(LoginActivity.this);
+                    queue.add(postRequest);
                 }
             }
         });

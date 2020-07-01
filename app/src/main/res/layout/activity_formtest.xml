@@ -1,15 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.austraila.online_anytime.Common.CustomScrollview
-    android:id="@+id/scrollmain"
+
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <LinearLayout
-        android:id="@+id/linear_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    </LinearLayout>
-</com.austraila.online_anytime.Common.CustomScrollview>
+    <androidx.appcompat.widget.Toolbar
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:orientation="horizontal"
+
+        android:background="@color/colorBackground">
+        <TextView
+            android:id="@+id/back_textview"
+            android:layout_width="28dp"
+            android:layout_height="22dp"
+            android:layout_marginLeft="15dp"
+            android:background="@drawable/back_icon"
+            android:layout_marginTop="7dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/main_title"
+            android:textSize="22dp"
+            android:textStyle="bold"
+            android:layout_marginLeft="25dp"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/white_color"/>
+
+        <TextView
+            android:id="@+id/next_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:textColor="@color/white_color"
+            android:textSize="18dp"
+            android:layout_marginRight="20dp"
+            android:textStyle="bold"
+            android:text="Next"/>
+
+    </androidx.appcompat.widget.Toolbar>
+
+    <com.austraila.online_anytime.Common.CustomScrollview
+        android:id="@+id/scrollmain"
+
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:id="@+id/linear_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+
+        </LinearLayout>
+
+    </com.austraila.online_anytime.Common.CustomScrollview>
+
+</LinearLayout>
 

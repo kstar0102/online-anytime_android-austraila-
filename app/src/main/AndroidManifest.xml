@@ -7,6 +7,7 @@
         android:required="true" />
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
@@ -15,8 +16,8 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_DOWNLOAD_MANAGER" />
+
 
     <application
         android:allowBackup="true"
@@ -26,11 +27,16 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
 
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
         <activity android:name=".activitys.LoginActivity" />
         <activity android:name=".activitys.ForgetActivity" />
         <activity android:name=".activitys.MainActivity" />
         <activity android:name=".activitys.EachItemActivity" />
         <activity android:name=".activitys.FormActivity" />
+        <activity android:name=".activitys.SettingActivity"/>
         <activity android:name=".activitys.cameraActivity.CameraActivity" />
         <activity android:name=".activitys.SplashActivity">
             <intent-filter>

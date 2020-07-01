@@ -12,14 +12,17 @@
     <string name="pass_hint">Password</string>
     <string name="login_button">SIGN IN</string>
     <string name="login_forget">Forget password?</string>
+    <string name="login_error">ERROR</string>
+    <string name="login_error_des">Login failed. Enter your email address and password again.</string>
 
 <!--    forget page-->
     <string name="forget_button">FORGOT</string>
     <string name="forget_signin">Sign in</string>
     <string name="forget_display">We will send the link for reset password to your email</string>
 
-<!--    G1 - RIIRIS301D (Practical Assessment) Copy-->
+<!--    main activity-->
     <string name="G1_title">G1 - RIIRIS301D (Practical Assessment) Copy</string>
+    <string name="main_title">Form submission</string>
 
 
     <string name="bottom_sheet_option_camera">Use Camera</string>

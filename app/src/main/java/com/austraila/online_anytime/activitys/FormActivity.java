@@ -77,6 +77,14 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
             startActivityForResult(cInt,Image_Capture_Code);
         }
 
+        TextView backTextView = findViewById(R.id.back_textview);
+        backTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
+
         SingleLineTest();
         SignatureMainLayout();
         ParagraphText();

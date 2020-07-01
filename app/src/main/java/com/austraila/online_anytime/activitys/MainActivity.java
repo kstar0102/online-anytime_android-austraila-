@@ -78,14 +78,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         return true;
 
                     case R.id.sidebar_setting:
+                        Intent intent_setting = new Intent(MainActivity.this, SettingActivity.class);
+                        startActivity(intent_setting);
                         Toast.makeText(MainActivity.this, "clicked setting", Toast.LENGTH_LONG).show();
                         return true;
 
                     case R.id.sidebar_logout:
+                        Intent intent_logout = new Intent(MainActivity.this, LoginActivity.class);
+                        startActivity(intent_logout);
                         Toast.makeText(MainActivity.this, "clicked logout", Toast.LENGTH_LONG).show();
                         return true;
-//
-//
+
+
                 }
                 return false;
             }
