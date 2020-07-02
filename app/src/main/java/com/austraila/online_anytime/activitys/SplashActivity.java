@@ -27,19 +27,7 @@ public class SplashActivity extends AppCompatActivity {
         db = openHelper.getWritableDatabase();
 
         final Cursor cursor = db.rawQuery("SELECT *FROM " + DatabaseHelper.TABLE_NAME,  null);
-        if(cursor != null){
-            Log.e("TAGtotal", String.valueOf(cursor.getCount()));
-            if (cursor.moveToFirst()){
-                do{
-                    Log.e("TAGId", cursor.getString(cursor.getColumnIndex("ID")));
-                    Log.e("TAGGmail", cursor.getString(cursor.getColumnIndex("Gmail")));
-                    Log.e("TAGPass", cursor.getString(cursor.getColumnIndex("Password")));
-                }while(cursor.moveToNext());
-            }
-            cursor.close();
-        }else {
-            Log.e("No Data", "No cursor");
-        }
+
 
         new Handler().postDelayed(new Runnable() {
             @Override

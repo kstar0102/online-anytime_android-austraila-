@@ -137,7 +137,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
 
         this.buttonsLayout = this.buttonsLayout();
         this.signatureView = new SignatureView(this);
-        signatureView.setBackground(getResources().getDrawable(R.drawable.textview_border));
+        signatureView.setBackground(getResources().getDrawable(R.drawable.editview_border));
 
         signatureView.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -833,7 +833,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         editText.setHint("Please write");
 
         editText.setTextColor(getResources().getColor(R.color.colorPrimaryDark));
-        editText.setBackground(getResources().getDrawable(R.drawable.textview_border));
+        editText.setBackground(getResources().getDrawable(R.drawable.editview_border));
         editText.setPadding(20,20,20,20);
 
         // set margin and height and width

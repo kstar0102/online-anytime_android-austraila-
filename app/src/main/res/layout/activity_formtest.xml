@@ -31,7 +31,6 @@
             android:textColor="@color/white_color"/>
 
         <TextView
-            android:id="@+id/next_textview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="right"

@@ -29,7 +29,7 @@
             android:layout_marginLeft="30dp"
             android:layout_marginRight="30dp"
             android:layout_height="40dp"
-            android:background="@drawable/textview_border"
+            android:background="@drawable/editview_border"
             android:padding="5dp"
             android:hint="@string/email_hint"
             android:layout_gravity="center"/>
