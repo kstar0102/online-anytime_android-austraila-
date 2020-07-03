@@ -12,6 +12,8 @@ public class FormDatabaeHelper extends SQLiteOpenHelper {
     public static final String FCOL_1 = "FID";
     public static final String FCOL_2 = "Ftitle";
     public static final String FCOL_3 = "Ftitle_id";
+    public static final String FCOL_4 = "Fchecksum";
+    public static final String FCOL_5 = "form_description";
 
     public FormDatabaeHelper(Context context) {
         super(context, DATABASE_NAME, null, 1);
@@ -19,7 +21,7 @@ public class FormDatabaeHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE " + FORMTABLE_NAME + " (FID INTEGER PRIMARY KEY AUTOINCREMENT,Ftitle TEXT,Ftitle_id TEXT)");
+        db.execSQL("CREATE TABLE " + FORMTABLE_NAME + " (FID INTEGER PRIMARY KEY AUTOINCREMENT,Ftitle TEXT,Ftitle_id TEXT,Fchecksum TEXT,form_description TEXT)");
     }
 
     @Override

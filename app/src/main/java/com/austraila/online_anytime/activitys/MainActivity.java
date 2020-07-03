@@ -1,5 +1,6 @@
 package com.austraila.online_anytime.activitys;
 
+import android.content.ClipData;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
@@ -13,6 +14,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -30,6 +33,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.austraila.online_anytime.Common.Common;
 import com.austraila.online_anytime.LocalManage.DatabaseHelper;
+import com.austraila.online_anytime.LocalManage.ElementDatabaseHelper;
 import com.austraila.online_anytime.LocalManage.FormDatabaeHelper;
 import com.austraila.online_anytime.R;
 import com.austraila.online_anytime.adapter.CustomAdapter;
@@ -47,38 +51,174 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, SearchView.OnQueryTextListener {
     private DrawerLayout drawer;
     private NavigationView navigation;
-    private SQLiteDatabase db,Db;
-    private SQLiteOpenHelper openHelper,FormopenHelper;
+    private SQLiteDatabase db,Db,EDb;
+    private SQLiteOpenHelper openHelper,FormopenHelper,ElementopenHelper;
     ListView listView;
     ArrayList Listitem=new ArrayList<>();
     JSONArray ApiList = new JSONArray();
+    JSONArray ElemnetList = new JSONArray();
     SearchView searchView;
-    String useremail, result;
+    String useremail, result, checksum;
     CustomAdapter myAdapter;
     RequestQueue queue;
-    ArrayList<String> listdata = new ArrayList<String>();
+    ArrayList<String> listFormId = new ArrayList<String>();
+    ArrayList<String> listFormDes = new ArrayList<String>();
+    ImageView reloadBtn;
+    ArrayList<String> data = new ArrayList<String>();
 
-    ArrayAdapter<String> adapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
         getSupportActionBar().hide();
 
-        openHelper = new DatabaseHelper(this);
-        FormopenHelper = new FormDatabaeHelper(this);
-        db = openHelper.getWritableDatabase();
-        Db = FormopenHelper.getWritableDatabase();
-        final Cursor fcursor = Db.rawQuery("SELECT *FROM " + FormDatabaeHelper.FORMTABLE_NAME,  null);
-
         //defile the element
         listView = findViewById(R.id.mainListView);
         searchView = findViewById(R.id.search_view);
+        reloadBtn = findViewById(R.id.reload_btn);
+
+        //local database define
+        openHelper = new DatabaseHelper(this);
+        FormopenHelper = new FormDatabaeHelper(this);
+        ElementopenHelper = new ElementDatabaseHelper(this);
+        db = openHelper.getWritableDatabase();
+        Db = FormopenHelper.getWritableDatabase();
+        EDb = ElementopenHelper.getWritableDatabase();
+
+        init();
+
+        reloadBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Cursor fcursor = Db.rawQuery("SELECT *FROM " + FormDatabaeHelper.FORMTABLE_NAME,  null);
+
+                //Connect the Api
+                String url = Common.getInstance().getMainItemUrl();
+                StringRequest postRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        JSONObject jsonObject = null;
+                        try {
+                            jsonObject = new JSONObject(response);
+                            result = jsonObject.getString("success");
+                            if (result.equals("true")){
+                                ApiList = jsonObject.getJSONArray("forms");
+                                String Apichecksum = jsonObject.getString("checksum");
+
+                                if(checksum != Apichecksum){
+                                    Db.execSQL("delete from "+ FormDatabaeHelper.FORMTABLE_NAME);
+                                    EDb.execSQL("delete from "+ ElementDatabaseHelper.ElEMENTTABLE_NAME);
+                                    for(int i = 0; i < ApiList.length(); i++){
+                                        insertData(ApiList.getJSONObject(i).getString("form_name")
+                                                ,ApiList.getJSONObject(i).getString("form_id")
+                                                , Apichecksum
+                                                ,ApiList.getJSONObject(i).getString("form_description"));
+                                    }
+                                    elementSave();
+                                    update();
+                                    sideMenu_mangement();
+                                }else {
+                                    update();
+                                    sideMenu_mangement();
+                                }
+                            } else {
+                                update();
+                                sideMenu_mangement();
+                                Toast.makeText(MainActivity.this, "Oops, can't login! please try to login again.", Toast.LENGTH_LONG).show();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        update();
+                        sideMenu_mangement();
+                        System.out.println(error);
+                        Toast.makeText(MainActivity.this, "It is currently offline.", Toast.LENGTH_LONG).show();
+                    }
+                }){
+                };
+                queue = Volley.newRequestQueue(MainActivity.this);
+                queue.add(postRequest);
+            }
+        });
+    }
+
+    private void update(){
+        if (listView!= null) {
+            listView.invalidateViews();
+        }
+        myAdapter.notifyDataSetChanged();
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent,
+                                    View v, int position, long id){
+                Intent intent = new Intent(MainActivity.this, FormActivity.class);
+                intent.putExtra("id", listFormId.get(position));
+                startActivity(intent);
+            }
+        });
+    }
+
+    private void elementSave() throws JSONException {
+        System.out.println(ApiList.length());
+        for (int i = 0; i < ApiList.length(); i ++){
+            final String formId = ApiList.getJSONObject(i).getString("form_id");
+            System.out.println(formId);
+            StringRequest postRequest = new StringRequest(Request.Method.GET, Common.getInstance().getFormelementUrl() + formId + Common.getInstance().getApiKey(), new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    JSONObject jsonObject = null;
+                    try {
+                        jsonObject = new JSONObject(response);
+                        result = jsonObject.getString("success");
+                        if (result.equals("true")){
+//                            EDb.execSQL("delete from "+ ElementDatabaseHelper.ElEMENTTABLE_NAME);
+                            ElemnetList = jsonObject.getJSONArray("forms");
+//                            System.out.println(ElemnetList);
+                            for(int j = 0; j < ElemnetList.length(); j++){
+                                insertElementData(ElemnetList.getJSONObject(j).getString("element_id")
+                                        ,ElemnetList.getJSONObject(j).getString("element_title")
+                                        ,ElemnetList.getJSONObject(j).getString("element_guidelines")
+                                        ,ElemnetList.getJSONObject(j).getString("element_type")
+                                        ,ElemnetList.getJSONObject(j).getString("element_position")
+                                        ,ElemnetList.getJSONObject(j).getString("element_page_number")
+                                        ,ElemnetList.getJSONObject(j).getString("element_submit_primary_text")
+                                        ,ElemnetList.getJSONObject(j).getString("element_submit_secondary_text")
+                                        ,formId);
+                            }
+
+                        } else {
+                            Toast.makeText(MainActivity.this, "Oops, Request failed..", Toast.LENGTH_LONG).show();
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    ListviewManagement();
+                    sideMenu_mangement();
+                    System.out.println(error);
+                    Toast.makeText(MainActivity.this, "It is currently offline.", Toast.LENGTH_LONG).show();
+                }
+            }){
+            };
+            queue = Volley.newRequestQueue(MainActivity.this);
+            queue.add(postRequest);
+        }
+    }
+
+    private void init() {
+        final Cursor fcursor = Db.rawQuery("SELECT *FROM " + FormDatabaeHelper.FORMTABLE_NAME,  null);
 
         //Connect the Api
         String url = Common.getInstance().getMainItemUrl();
         StringRequest postRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
-                @Override
+            @Override
             public void onResponse(String response) {
                 JSONObject jsonObject = null;
                 try {
@@ -86,27 +226,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     result = jsonObject.getString("success");
                     if (result.equals("true")){
                         ApiList = jsonObject.getJSONArray("forms");
-                        System.out.println(fcursor.getCount());
-                        System.out.println(ApiList);
-                        if(fcursor.equals(null)){
-                            for(int i = 0; i < ApiList.length(); i++){
-                                insertData(ApiList.getJSONObject(i).getString("form_name"),ApiList.getJSONObject(i).getString("form_id"));
-                            }
-                            init();
-                            sideMenu_mangement();
-                        }
-                        if(ApiList.length() != fcursor.getCount()){
+                        String Apichecksum = jsonObject.getString("checksum");
+
+                        if(checksum != Apichecksum){
                             Db.execSQL("delete from "+ FormDatabaeHelper.FORMTABLE_NAME);
+                            EDb.execSQL("delete from "+ ElementDatabaseHelper.ElEMENTTABLE_NAME);
                             for(int i = 0; i < ApiList.length(); i++){
-                                insertData(ApiList.getJSONObject(i).getString("form_name"),ApiList.getJSONObject(i).getString("form_id"));
+                                insertData(ApiList.getJSONObject(i).getString("form_name")
+                                        ,ApiList.getJSONObject(i).getString("form_id")
+                                        , Apichecksum
+                                        ,ApiList.getJSONObject(i).getString("form_description"));
                             }
-                            init();
+                            elementSave();
+                            ListviewManagement();
+                            sideMenu_mangement();
+                        }else {
+                            ListviewManagement();
                             sideMenu_mangement();
                         }
-                        init();
-                        sideMenu_mangement();
                     } else {
-                        init();
+                        ListviewManagement();
                         sideMenu_mangement();
                         Toast.makeText(MainActivity.this, "Oops, can't login! please try to login again.", Toast.LENGTH_LONG).show();
                     }
@@ -115,14 +254,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             }
         }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    init();
-                    sideMenu_mangement();
-                    System.out.println(error);
-                    Toast.makeText(MainActivity.this, "It is currently offline.", Toast.LENGTH_LONG).show();
-                }
-            }){
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                ListviewManagement();
+                sideMenu_mangement();
+                System.out.println(error);
+                Toast.makeText(MainActivity.this, "It is currently offline.", Toast.LENGTH_LONG).show();
+            }
+        }){
         };
         queue = Volley.newRequestQueue(MainActivity.this);
         queue.add(postRequest);
@@ -183,18 +322,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
-    private void init() {
+    private void ListviewManagement() {
+
         final Cursor fcursor = Db.rawQuery("SELECT *FROM " + FormDatabaeHelper.FORMTABLE_NAME,  null);
-        System.out.println(fcursor.getColumnIndex("form_name"));
+
         if (fcursor.moveToFirst()){
             do{
-                System.out.println(fcursor.getColumnIndex("Ftitle"));
-                String data = fcursor.getString(fcursor.getColumnIndex("Ftitle"));
-//                Log.e("aaaaaaaa", data );
-                Listitem.add(new Listmodel(data));
+                data.add(fcursor.getString(fcursor.getColumnIndex("Ftitle")));
+                listFormId.add(fcursor.getString(fcursor.getColumnIndex("Ftitle_id")));
+                listFormDes.add(fcursor.getString(fcursor.getColumnIndex("form_description")));
             }while(fcursor.moveToNext());
         }
         fcursor.close();
+        for(int i = 0; i < data.size(); i++){
+            Listitem.add(new Listmodel(data.get(i)));
+        }
 
         myAdapter=new CustomAdapter(MainActivity.this, Listitem);
         listView.setAdapter(myAdapter);
@@ -202,10 +344,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent,
                                     View v, int position, long id){
-                if(position == 0){
-                    Intent intent = new Intent(MainActivity.this, FormActivity.class);
-                    startActivity(intent);
-                }
+                Intent intent = new Intent(MainActivity.this, FormActivity.class);
+                intent.putExtra("id", listFormId.get(position));
+                intent.putExtra("des", listFormDes.get(position));
+                startActivity(intent);
             }
         });
     }
@@ -241,11 +383,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return false;
     }
 
-    public void insertData(String ftitle,String ftitle_id){
+    public void insertData(String ftitle,String ftitle_id, String checksum,String formDes){
         ContentValues contentValues = new ContentValues();
         contentValues.put(FormDatabaeHelper.FCOL_2, ftitle);
         contentValues.put(FormDatabaeHelper.FCOL_3, ftitle_id);
+        contentValues.put(FormDatabaeHelper.FCOL_4, checksum);
+        contentValues.put(FormDatabaeHelper.FCOL_5, formDes);
         Db.insert(FormDatabaeHelper.FORMTABLE_NAME,null,contentValues);
+    }
+
+    public void insertElementData(String element_id,String element_title, String element_guidelines, String element_type, String element_position, String element_page_number, String element_submit_primary_text, String element_submit_secondary_text, String formid){
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(ElementDatabaseHelper.ECOL_2, element_id);
+        contentValues.put(ElementDatabaseHelper.ECOL_3, element_title);
+        contentValues.put(ElementDatabaseHelper.ECOL_4, element_guidelines);
+        contentValues.put(ElementDatabaseHelper.ECOL_5, element_type);
+        contentValues.put(ElementDatabaseHelper.ECOL_6, element_position);
+        contentValues.put(ElementDatabaseHelper.ECOL_7, element_page_number);
+        contentValues.put(ElementDatabaseHelper.ECOL_8, element_submit_primary_text);
+        contentValues.put(ElementDatabaseHelper.ECOL_9, element_submit_secondary_text);
+        contentValues.put(ElementDatabaseHelper.ECOL_10, formid);
+//        System.out.println(contentValues);
+        EDb.insert(ElementDatabaseHelper.ElEMENTTABLE_NAME,null,contentValues);
     }
 
 }

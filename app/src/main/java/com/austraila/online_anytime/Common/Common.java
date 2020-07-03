@@ -7,6 +7,8 @@ public class Common {
     private String mainItemUrl = "forms";
     private String LogingUrl = "http://online-anytime.com.au";
 
+    private String formelementUrl = "http://192.168.107.90:89/form_elements/";
+
     private static Common instance = new Common();
 
     public static Common getInstance()
@@ -19,6 +21,10 @@ public class Common {
     }
     public String getApiKey() {
         return ApiKey;
+    }
+
+    public String getFormelementUrl(){
+        return formelementUrl;
     }
 
     public String getMainItemUrl() { return TestbaseUrl + mainItemUrl + ApiKey;}

@@ -3,6 +3,9 @@ package com.austraila.online_anytime.activitys;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
@@ -36,6 +39,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.austraila.online_anytime.Common.CustomScrollview;
+import com.austraila.online_anytime.LocalManage.ElementDatabaseHelper;
 import com.austraila.online_anytime.R;
 import com.austraila.online_anytime.Common.AddPhotoBottomDialogFragment;
 import com.austraila.online_anytime.activitys.signature.SignatureView;
@@ -43,6 +47,7 @@ import com.austraila.online_anytime.activitys.signature.SignatureView;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 import static com.austraila.online_anytime.activitys.cameraActivity.CameraActivity.Image_Capture_Code;
@@ -55,12 +60,20 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
     SignatureView signatureView;
     Bitmap photo;
     CustomScrollview customScrollview;
+    Cursor cursor;
+    private SQLiteDatabase db;
+    private SQLiteOpenHelper openHelper;
+    ArrayList<String> data = new ArrayList<String>();
+
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_formtest);
         getSupportActionBar().hide();
+
+        openHelper = new ElementDatabaseHelper(this);
+        db = openHelper.getReadableDatabase();
 
         customScrollview = (CustomScrollview) findViewById(R.id.scrollmain);
         customScrollview.setEnableScrolling(true);
@@ -84,23 +97,40 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
                 onBackPressed();
             }
         });
+        String formid = getIntent().getStringExtra("id");
+        String formDes = getIntent().getStringExtra("des");
+        System.out.println(formid);
+        System.out.println(formDes);
 
-        SingleLineTest();
-        SignatureMainLayout();
-        ParagraphText();
-        MultipleChoice();
-        NameLint();
-        TimeLint();
-        PriceLint();
-        SectionBreak();
-        MediaLint();
-        NumberLint();
-        CheckBoxes();
-        DropDown();
-        DateLint();
-        PhoneLint();
-        WebSiteLint();
-        fileUpload();
+        cursor = db.rawQuery("SELECT *FROM " + ElementDatabaseHelper.ElEMENTTABLE_NAME + " WHERE " + ElementDatabaseHelper.ECOL_10 + "=?", new String[]{formid});
+        System.out.println(cursor.getCount());
+        if (cursor.moveToFirst()){
+            do{
+                data.add(cursor.getString(cursor.getColumnIndex("element_type")));
+
+            }while(cursor.moveToNext());
+        }
+        cursor.close();
+        System.out.println(data);
+
+
+
+//        SingleLineTest();
+//        SignatureMainLayout();
+//        ParagraphText();
+//        MultipleChoice();
+//        NameLint();
+//        TimeLint();
+//        PriceLint();
+//        SectionBreak();
+//        MediaLint();
+//        NumberLint();
+//        CheckBoxes();
+//        DropDown();
+//        DateLint();
+//        PhoneLint();
+//        WebSiteLint();
+//        fileUpload();
     }
 
     private void WebSiteLint() {
