@@ -63,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     RequestQueue queue;
     ArrayList<String> listFormId = new ArrayList<String>();
     ArrayList<String> listFormDes = new ArrayList<String>();
+    ArrayList<String> listFormtitle = new ArrayList<String>();
     ImageView reloadBtn;
     ArrayList<String> data = new ArrayList<String>();
 
@@ -331,6 +332,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 data.add(fcursor.getString(fcursor.getColumnIndex("Ftitle")));
                 listFormId.add(fcursor.getString(fcursor.getColumnIndex("Ftitle_id")));
                 listFormDes.add(fcursor.getString(fcursor.getColumnIndex("form_description")));
+                listFormtitle.add(fcursor.getString(fcursor.getColumnIndex("Ftitle")));
             }while(fcursor.moveToNext());
         }
         fcursor.close();
@@ -347,6 +349,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Intent intent = new Intent(MainActivity.this, FormActivity.class);
                 intent.putExtra("id", listFormId.get(position));
                 intent.putExtra("des", listFormDes.get(position));
+                intent.putExtra("title", listFormtitle.get(position));
                 startActivity(intent);
             }
         });
@@ -403,7 +406,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         contentValues.put(ElementDatabaseHelper.ECOL_8, element_submit_primary_text);
         contentValues.put(ElementDatabaseHelper.ECOL_9, element_submit_secondary_text);
         contentValues.put(ElementDatabaseHelper.ECOL_10, formid);
-//        System.out.println(contentValues);
         EDb.insert(ElementDatabaseHelper.ElEMENTTABLE_NAME,null,contentValues);
     }
 

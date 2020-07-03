@@ -21,6 +21,7 @@ import static android.app.Activity.RESULT_OK;
 
 public class AddPhotoBottomDialogFragment extends BottomSheetDialogFragment {
     TextView photoIcon, localIcon;
+    String strtext,formDes,formtitle;
 
     public static AddPhotoBottomDialogFragment newInstance() {
         return new AddPhotoBottomDialogFragment();
@@ -28,21 +29,24 @@ public class AddPhotoBottomDialogFragment extends BottomSheetDialogFragment {
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater,
-                             @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-
-        View view = inflater.inflate(R.layout.layout_photo_bottom_sheet, container,
-                false);
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        strtext = getArguments().getString("id");
+        formDes = getArguments().getString("formDes");
+        formtitle = getArguments().getString("formtitle");
+        System.out.println(strtext);
+        View view = inflater.inflate(R.layout.layout_photo_bottom_sheet, container,false);
         photoIcon = view.findViewById(R.id.tv_btn_add_photo_camera);
         localIcon = view.findViewById(R.id.tv_btn_add_photo_gallery);
 
         photoIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getContext(), "photo", Toast.LENGTH_LONG).show();
+//                Toast.makeText(getContext(), "photo", Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(getActivity(), FormActivity.class);
                 intent.putExtra("camera", "camera");
+                intent.putExtra("id", strtext);
+                intent.putExtra("des", formDes);
+                intent.putExtra("title", formtitle);
                 startActivity(intent);
                 dismiss();
             }
@@ -73,6 +77,9 @@ public class AddPhotoBottomDialogFragment extends BottomSheetDialogFragment {
                     String path = file.getAbsolutePath();
                     Intent intent = new Intent(getActivity(), FormActivity.class);
                     intent.putExtra("filepath", path);
+                    intent.putExtra("id", strtext);
+                    intent.putExtra("des", formDes);
+                    intent.putExtra("title", formtitle);
                     startActivity(intent);
                 }
                 break;
