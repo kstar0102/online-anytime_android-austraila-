@@ -14,6 +14,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.austraila.online_anytime.LocalManage.DatabaseHelper;
 import com.austraila.online_anytime.R;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class SplashActivity extends AppCompatActivity {
     private SQLiteDatabase db;
     private SQLiteOpenHelper openHelper;
@@ -25,6 +28,13 @@ public class SplashActivity extends AppCompatActivity {
         getSupportActionBar().hide();
         openHelper = new DatabaseHelper(this);
         db = openHelper.getWritableDatabase();
+
+        String str = "<h5><b>If no internet connection is available your form will not Geo-Stamp. If no mobile sync, please ensure you complete the site location details</b></h5>";
+        Matcher m = Pattern.compile("<b>(.+?)</b>").matcher(str);
+        while(m.find()) {
+            String v = m.group(1);
+            System.out.println(v);
+        }
 
         final Cursor cursor = db.rawQuery("SELECT *FROM " + DatabaseHelper.TABLE_NAME,  null);
 

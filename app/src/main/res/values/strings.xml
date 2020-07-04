@@ -20,6 +20,7 @@
 
 <!--    main activity-->
     <string name="main_title">Form submission</string>
+    <string name="loading">Loading・・・</string>
 
 
     <string name="bottom_sheet_option_camera">Use Camera</string>

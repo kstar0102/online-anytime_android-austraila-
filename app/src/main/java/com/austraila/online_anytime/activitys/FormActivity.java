@@ -15,6 +15,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.text.Html;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.util.Log;
@@ -98,7 +99,8 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         backTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onBackPressed();
+                Intent intent = new Intent(FormActivity.this, MainActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -108,26 +110,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         formtitle = getIntent().getStringExtra("title");
 
         //make the Page title
-        TextView TitleTextvew = new TextView(this);
-        TextView desTextview = new TextView(this);
-        TitleTextvew.setText(formtitle);
-
-        titleTextview(TitleTextvew);
-        TitleTextvew.setTextSize(getResources().getDimension(R.dimen.textsize_title));
-
-
-        LinearLayout.LayoutParams breakdesparams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
-        breakdesparams.setMargins(50,0,50,0);
-        titleTextview(desTextview);
-        desTextview.setText(formDes);
-        desTextview.setLayoutParams(breakdesparams);
-        desTextview.setTextSize(getResources().getDimension(R.dimen.textsize_normal));
-
-        linearLayout.addView(TitleTextvew);
-        linearLayout.addView(desTextview);
+        setTextTitle();
 
 
         cursor = db.rawQuery("SELECT *FROM " + ElementDatabaseHelper.ElEMENTTABLE_NAME + " WHERE " + ElementDatabaseHelper.ECOL_10 + "=?", new String[]{formid});
@@ -143,7 +126,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
                         DateLint(cursor.getString(cursor.getColumnIndex("element_title")));
                         break;
                     case "file":
-                        fileUpload();
+                        fileUpload(cursor.getString(cursor.getColumnIndex("element_title")));
                         break;
                     case "email":
                         SingleLineTest(cursor.getString(cursor.getColumnIndex("element_title")));
@@ -190,13 +173,37 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
                     case "page_break":
                         page_break(cursor.getString(cursor.getColumnIndex("element_submit_primary_text")));
                         break;
+                    case "section":
+                        SectionBreak(cursor.getString(cursor.getColumnIndex("element_title")), cursor.getString(cursor.getColumnIndex("element_guidelines")));
                 }
-
             }while(cursor.moveToNext());
         }
-        cursor.close();
+        System.out.println(formid);
         System.out.println(data);
+        cursor.close();
+    }
 
+    private void setTextTitle() {
+        TextView TitleTextvew = new TextView(this);
+        TextView desTextview = new TextView(this);
+        TitleTextvew.setText(Html.fromHtml(formtitle));
+
+        titleTextview(TitleTextvew);
+        TitleTextvew.setTextSize(getResources().getDimension(R.dimen.textsize_title));
+
+
+        LinearLayout.LayoutParams breakdesparams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        breakdesparams.setMargins(50,0,50,0);
+        titleTextview(desTextview);
+        desTextview.setText(Html.fromHtml(formDes));
+        desTextview.setLayoutParams(breakdesparams);
+        desTextview.setTextSize(getResources().getDimension(R.dimen.textsize_normal));
+
+        linearLayout.addView(TitleTextvew);
+        linearLayout.addView(desTextview);
     }
 
     private void WebSiteLint(String title) {
@@ -206,7 +213,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
 
         // set the property
         titleTextview(webSiteTitle);
-        webSiteTitle.setText(title);
+        webSiteTitle.setText(Html.fromHtml(title));
         EditTextview(websiteEdit);
         websiteEdit.setText("http://");
 
@@ -219,7 +226,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         //set signature title
         TextView signTitle = new TextView(this);
         titleTextview(signTitle);
-        signTitle.setText(title);
+        signTitle.setText(Html.fromHtml(title));
 
         LinearLayout signview = new LinearLayout(this);
         LinearLayout.LayoutParams signviewParma = new LinearLayout.LayoutParams(
@@ -363,7 +370,11 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
 
     // file exploer funtion
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private void fileUpload() {
+    private void fileUpload(String title) {
+        TextView filetitle = new TextView(this);
+        titleTextview(filetitle);
+        filetitle.setText(Html.fromHtml(title));
+
         //define the button.
         Button uploadbtn = new Button(this);
         LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(
@@ -372,13 +383,14 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         );
         btnParams.setMargins(50,25,50,10);
         uploadbtn.setLayoutParams(btnParams);
-        uploadbtn.setWidth(500);
-        uploadbtn.setHeight(70);
+        uploadbtn.setWidth(450);
+        uploadbtn.setHeight(60);
         uploadbtn.setBackground(getDrawable(R.drawable.btn_rounded));
         uploadbtn.setText("Select File");
         uploadbtn.setTextColor(getResources().getColor(R.color.white_color));
         uploadbtn.setTypeface(uploadbtn.getTypeface(), Typeface.BOLD);
         uploadbtn.setTextSize(getResources().getDimension(R.dimen.textsize_normal));
+        linearLayout.addView(filetitle);
         linearLayout.addView(uploadbtn);
 
         uploadbtn.setOnClickListener(new View.OnClickListener() {
@@ -453,7 +465,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
 
         //define the dateTitle
         TextView dateTitle = new TextView(this);
-        dateTitle.setText(title);
+        dateTitle.setText(Html.fromHtml(title));
         titleTextview(dateTitle);
         linearLayout.addView(dateTitle);
 
@@ -481,7 +493,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         //define the phone title
         TextView phoneTitle = new TextView(this);
         titleTextview(phoneTitle);
-        phoneTitle.setText(title);
+        phoneTitle.setText(Html.fromHtml(title));
         linearLayout.addView(phoneTitle);
 
         //define the phone number LinearLayout edit
@@ -555,7 +567,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         //define the dropdown title
         TextView dropTitle = new TextView(this);
         titleTextview(dropTitle);
-        dropTitle.setText(title);
+        dropTitle.setText(Html.fromHtml(title));
         linearLayout.addView(dropTitle);
 
         String[] users = {"Suresh Dasari", "Trishika Dasari", "Rohini Alavala", "Praveen Kumar", "Madhav Sai"};
@@ -567,6 +579,8 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         dropdownParams.setMargins(60,10,50,0);
         Spinner dropdown = new Spinner(this);
         dropdown.setLayoutParams(dropdownParams);
+        dropdown.setBackground(getResources().getDrawable(R.drawable.editview_border));
+
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.spinner_dropdown_item, users);
         adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         dropdown.setAdapter(adapter);
@@ -578,7 +592,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         //define the checkboxesTitle
         TextView checkboxesTitle = new TextView(this);
         titleTextview(checkboxesTitle);
-        checkboxesTitle.setText(title);
+        checkboxesTitle.setText(Html.fromHtml(title));
         linearLayout.addView(checkboxesTitle);
 
         String[] ab ={"CheckBox1","CheckBox2"};
@@ -611,7 +625,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
 
         //set property the numberTitle
         titleTextview(numberTitle);
-        numberTitle.setText(title);
+        numberTitle.setText(Html.fromHtml(title));
         linearLayout.addView(numberTitle);
 
         //set property the numberEdit
@@ -627,7 +641,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         ImageView mediaImage = new ImageView(this);
 
         //set property the mediatitle
-        mediaTitle.setText(title);
+        mediaTitle.setText(Html.fromHtml(title));
         titleTextview(mediaTitle);
 
         linearLayout.addView(mediaTitle);
@@ -643,14 +657,14 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         linearLayout.addView(mediaImage);
     }
 
-    private void SectionBreak() {
+    private void SectionBreak(String title, String des) {
         //define the element
         TextView breakTitle = new TextView(this);
         TextView breakdes = new TextView(this);
 
         //set property the breakTitle
         titleTextview(breakTitle);
-        breakTitle.setText("Section Break");
+        breakTitle.setText(Html.fromHtml(title));
 
         //set property the breakdes
         LinearLayout.LayoutParams breakdesparams = new LinearLayout.LayoutParams(
@@ -659,7 +673,8 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         );
         breakdesparams.setMargins(50,0,50,0);
         titleTextview(breakdes);
-        breakdes.setText("aaaaa");
+        breakdes.setText(Html.fromHtml(des));
+
         breakdes.setLayoutParams(breakdesparams);
         breakdes.setTextSize(getResources().getDimension(R.dimen.textsize_normal));
 
@@ -734,7 +749,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         priceLinerlayout.addView(centEditText);
 
         //set property the price Title
-        priceTitle.setText(title);
+        priceTitle.setText(Html.fromHtml(title));
         titleTextview(priceTitle);
 
         // add the element
@@ -743,16 +758,35 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     private void page_break(String title){
-        Button button = new Button(this);
+        LinearLayout btnlinearLayout =new LinearLayout(this);
+        LinearLayout.LayoutParams btnLinerParam = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        btnLinerParam.setMargins(40,5,40,5);
+        btnlinearLayout.setOrientation(LinearLayout.HORIZONTAL);
+        btnlinearLayout.setLayoutParams(btnLinerParam);
+
+        Button nextbutton = new Button(this);
+        Button prebutton =new Button(this);
         LinearLayout.LayoutParams btnparams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        btnparams.setMargins(50,20,50,5);
-        button.setWidth(200);
-        button.setHeight(60);
-        button.setText(title);
-        linearLayout.addView(button);
+        btnparams.setMargins(10,20,10,5);
+        nextbutton.setWidth(300);
+        nextbutton.setHeight(60);
+        nextbutton.setText("Previous");
+        nextbutton.setLayoutParams(btnparams);
+
+        prebutton.setWidth(300);
+        prebutton.setHeight(60);
+        prebutton.setText(title);
+        prebutton.setLayoutParams(btnparams);
+        btnlinearLayout.addView(nextbutton);
+        btnlinearLayout.addView(prebutton);
+
+        linearLayout.addView(btnlinearLayout);
     }
 
     private void TimeLint(String title) {
@@ -789,7 +823,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         });
 
         // set the propert of the timeTitle
-        timeTitle.setText(title);
+        timeTitle.setText(Html.fromHtml(title));
         titleTextview(timeTitle);
 
         // set the property of the timepicker
@@ -813,7 +847,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         EditText editText = new EditText(this);
 
         // set text in textview.
-        textView.setText(title);
+        textView.setText(Html.fromHtml(title));
 
         //set property
         titleTextview(textView);
@@ -830,7 +864,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         EditText textArea = new EditText(this);
 
         // set property of element
-        paragraphTitle.setText(title);
+        paragraphTitle.setText(Html.fromHtml(title));
         titleTextview(paragraphTitle);
         EditTextview(textArea);
         textArea.setSingleLine(false);
@@ -848,7 +882,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         RadioGroup radioGroup = new RadioGroup(this);
 
         //set property the radiotile
-        radiotitle.setText(title);
+        radiotitle.setText(Html.fromHtml(title));
         titleTextview(radiotitle);
 
         // set property the radiogroup
@@ -879,7 +913,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         EditText lastname = new EditText(this);
 
         titleTextview(nametitle);
-        nametitle.setText(title);
+        nametitle.setText(Html.fromHtml(title));
 
         // define the name LinearLayout
         LinearLayout namelinearLayout = new LinearLayout(this);

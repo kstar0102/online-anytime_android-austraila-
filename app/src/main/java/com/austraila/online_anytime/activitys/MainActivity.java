@@ -17,6 +17,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -53,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private NavigationView navigation;
     private SQLiteDatabase db,Db,EDb;
     private SQLiteOpenHelper openHelper,FormopenHelper,ElementopenHelper;
+    RelativeLayout loading;
     ListView listView;
     ArrayList Listitem=new ArrayList<>();
     JSONArray ApiList = new JSONArray();
@@ -77,6 +79,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         listView = findViewById(R.id.mainListView);
         searchView = findViewById(R.id.search_view);
         reloadBtn = findViewById(R.id.reload_btn);
+        loading = findViewById(R.id.loadingLayout);
 
         //local database define
         openHelper = new DatabaseHelper(this);
@@ -86,6 +89,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Db = FormopenHelper.getWritableDatabase();
         EDb = ElementopenHelper.getWritableDatabase();
 
+        loading.setVisibility(View.VISIBLE);
         init();
 
         reloadBtn.setOnClickListener(new View.OnClickListener() {
@@ -176,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         jsonObject = new JSONObject(response);
                         result = jsonObject.getString("success");
                         if (result.equals("true")){
-//                            EDb.execSQL("delete from "+ ElementDatabaseHelper.ElEMENTTABLE_NAME);
+                            loading.setVisibility(View.GONE);
                             ElemnetList = jsonObject.getJSONArray("forms");
 //                            System.out.println(ElemnetList);
                             for(int j = 0; j < ElemnetList.length(); j++){
@@ -192,6 +196,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             }
 
                         } else {
+                            loading.setVisibility(View.GONE);
                             Toast.makeText(MainActivity.this, "Oops, Request failed..", Toast.LENGTH_LONG).show();
                         }
                     } catch (JSONException e) {
@@ -201,6 +206,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
+                    loading.setVisibility(View.GONE);
                     ListviewManagement();
                     sideMenu_mangement();
                     System.out.println(error);
@@ -240,13 +246,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             }
                             elementSave();
                             ListviewManagement();
+                            loading.setVisibility(View.GONE);
                             sideMenu_mangement();
                         }else {
                             ListviewManagement();
+                            loading.setVisibility(View.GONE);
                             sideMenu_mangement();
                         }
                     } else {
                         ListviewManagement();
+                        loading.setVisibility(View.GONE);
                         sideMenu_mangement();
                         Toast.makeText(MainActivity.this, "Oops, can't login! please try to login again.", Toast.LENGTH_LONG).show();
                     }
@@ -257,6 +266,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                loading.setVisibility(View.GONE);
                 ListviewManagement();
                 sideMenu_mangement();
                 System.out.println(error);

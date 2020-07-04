@@ -5,9 +5,13 @@ public class Common {
     private String TestloginUrl = "http://192.168.107.90:89/login";
     private String TestbaseUrl = "http://192.168.107.90:89/";
     private String mainItemUrl = "forms";
-    private String LogingUrl = "http://online-anytime.com.au";
-
     private String formelementUrl = "http://192.168.107.90:89/form_elements/";
+
+//    private String TestloginUrl = "http://online-anytime.com.au/olat/newapi/login";
+//    private String TestbaseUrl = "http://online-anytime.com.au/olat/newapi/";
+//    private String mainItemUrl = "forms";
+//    private String formelementUrl = "http://online-anytime.com.au/olat/newapi/form_elements/";
+
 
     private static Common instance = new Common();
 
