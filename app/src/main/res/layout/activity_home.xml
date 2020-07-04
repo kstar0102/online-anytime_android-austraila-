@@ -133,46 +133,46 @@
 
     </com.google.android.material.navigation.NavigationView>
 
-    <RelativeLayout
-        android:id="@+id/loadingLayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:elevation="10dp"
-        android:visibility="gone"
-        android:background="@color/half_transfer">
+<!--    <RelativeLayout-->
+<!--        android:id="@+id/loadingLayout"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:elevation="10dp"-->
+<!--        android:visibility="gone"-->
+<!--        android:background="@color/half_transfer">-->
 
-        <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:background="@drawable/border_loding"
-            android:padding="20dp">
+<!--        <RelativeLayout-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_centerHorizontal="true"-->
+<!--            android:layout_centerVertical="true"-->
+<!--            android:background="@drawable/border_loding"-->
+<!--            android:padding="20dp">-->
 
-            <ProgressBar
-                android:id="@+id/loading_spinner"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"
-                android:layout_gravity="center"
-                android:indeterminateTint="@color/black"
-                android:indeterminateTintMode="src_atop" />
+<!--            <ProgressBar-->
+<!--                android:id="@+id/loading_spinner"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_alignParentTop="true"-->
+<!--                android:layout_centerHorizontal="true"-->
+<!--                android:layout_gravity="center"-->
+<!--                android:indeterminateTint="@color/black"-->
+<!--                android:indeterminateTintMode="src_atop" />-->
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/loading_spinner"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="10dp"
-                android:text="@string/loading"
-                android:textColor="@color/black"
-                android:textSize="15dp"
-                android:textStyle="bold" />
+<!--            <TextView-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_below="@+id/loading_spinner"-->
+<!--                android:layout_centerHorizontal="true"-->
+<!--                android:layout_marginTop="10dp"-->
+<!--                android:text="@string/loading"-->
+<!--                android:textColor="@color/black"-->
+<!--                android:textSize="15dp"-->
+<!--                android:textStyle="bold" />-->
 
-        </RelativeLayout>
+<!--        </RelativeLayout>-->
 
-    </RelativeLayout>
+<!--    </RelativeLayout>-->
 
 
 

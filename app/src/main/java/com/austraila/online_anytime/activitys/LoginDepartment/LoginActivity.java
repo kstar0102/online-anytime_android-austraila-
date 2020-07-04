@@ -1,4 +1,4 @@
-package com.austraila.online_anytime.activitys;
+package com.austraila.online_anytime.activitys.LoginDepartment;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -21,6 +21,8 @@ import com.android.volley.toolbox.Volley;
 import com.austraila.online_anytime.Common.Common;
 import com.austraila.online_anytime.LocalManage.DatabaseHelper;
 import com.austraila.online_anytime.R;
+import com.austraila.online_anytime.activitys.MainActivity;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 

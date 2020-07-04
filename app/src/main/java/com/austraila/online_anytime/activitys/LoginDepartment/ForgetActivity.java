@@ -1,4 +1,4 @@
-package com.austraila.online_anytime.activitys;
+package com.austraila.online_anytime.activitys.LoginDepartment;
 
 import android.content.DialogInterface;
 import android.content.Intent;

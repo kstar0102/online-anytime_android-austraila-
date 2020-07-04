@@ -181,6 +181,27 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         System.out.println(formid);
         System.out.println(data);
         cursor.close();
+
+        submitButton();
+    }
+
+    private void submitButton() {
+        Button submitBtn =new Button(this);
+        LinearLayout.LayoutParams btnparams = new LinearLayout.LayoutParams(300,110);
+        btnparams.setMargins(50,20,10,5);
+        submitBtn.setBackground(getResources().getDrawable(R.drawable.btn_submit));
+        submitBtn.setText("Submit");
+        submitBtn.setTextColor(getResources().getColor(R.color.white_color));
+        submitBtn.setLayoutParams(btnparams);
+        linearLayout.addView(submitBtn);
+
+        submitBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(FormActivity.this, SuccessActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     private void setTextTitle() {
@@ -377,14 +398,9 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
 
         //define the button.
         Button uploadbtn = new Button(this);
-        LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
+        LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(500,110);
         btnParams.setMargins(50,25,50,10);
         uploadbtn.setLayoutParams(btnParams);
-        uploadbtn.setWidth(450);
-        uploadbtn.setHeight(60);
         uploadbtn.setBackground(getDrawable(R.drawable.btn_rounded));
         uploadbtn.setText("Select File");
         uploadbtn.setTextColor(getResources().getColor(R.color.white_color));
@@ -769,18 +785,13 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
 
         Button nextbutton = new Button(this);
         Button prebutton =new Button(this);
-        LinearLayout.LayoutParams btnparams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
+        LinearLayout.LayoutParams btnparams = new LinearLayout.LayoutParams(300, 120);
         btnparams.setMargins(10,20,10,5);
-        nextbutton.setWidth(300);
-        nextbutton.setHeight(60);
+
         nextbutton.setText("Previous");
         nextbutton.setLayoutParams(btnparams);
 
-        prebutton.setWidth(300);
-        prebutton.setHeight(60);
+
         prebutton.setText(title);
         prebutton.setLayoutParams(btnparams);
         btnlinearLayout.addView(nextbutton);

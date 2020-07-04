@@ -6,13 +6,13 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.austraila.online_anytime.LocalManage.DatabaseHelper;
 import com.austraila.online_anytime.R;
+import com.austraila.online_anytime.activitys.LoginDepartment.LoginActivity;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

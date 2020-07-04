@@ -31,13 +31,14 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <activity android:name=".activitys.LoginActivity" />
-        <activity android:name=".activitys.ForgetActivity" />
+        <activity android:name=".activitys.LoginDepartment.LoginActivity" />
+        <activity android:name=".activitys.LoginDepartment.ForgetActivity" />
         <activity android:name=".activitys.MainActivity" />
         <activity android:name=".activitys.EachItemActivity" />
         <activity android:name=".activitys.FormActivity" />
         <activity android:name=".activitys.SettingActivity"/>
         <activity android:name=".activitys.cameraActivity.CameraActivity" />
+        <activity android:name=".activitys.SuccessActivity"/>
         <activity android:name=".activitys.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

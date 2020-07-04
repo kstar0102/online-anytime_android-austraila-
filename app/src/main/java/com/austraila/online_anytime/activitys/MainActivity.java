@@ -1,6 +1,5 @@
 package com.austraila.online_anytime.activitys;
 
-import android.content.ClipData;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
@@ -8,13 +7,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -37,6 +33,7 @@ import com.austraila.online_anytime.LocalManage.DatabaseHelper;
 import com.austraila.online_anytime.LocalManage.ElementDatabaseHelper;
 import com.austraila.online_anytime.LocalManage.FormDatabaeHelper;
 import com.austraila.online_anytime.R;
+import com.austraila.online_anytime.activitys.LoginDepartment.LoginActivity;
 import com.austraila.online_anytime.adapter.CustomAdapter;
 import com.austraila.online_anytime.model.Listmodel;
 import com.google.android.material.navigation.NavigationView;
@@ -79,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         listView = findViewById(R.id.mainListView);
         searchView = findViewById(R.id.search_view);
         reloadBtn = findViewById(R.id.reload_btn);
-        loading = findViewById(R.id.loadingLayout);
+//        loading = findViewById(R.id.loadingLayout);
 
         //local database define
         openHelper = new DatabaseHelper(this);
@@ -89,8 +86,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Db = FormopenHelper.getWritableDatabase();
         EDb = ElementopenHelper.getWritableDatabase();
 
-        loading.setVisibility(View.VISIBLE);
+//        loading.setVisibility(View.VISIBLE);
         init();
+
 
         reloadBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -121,10 +119,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                     }
                                     elementSave();
                                     update();
-                                    sideMenu_mangement();
+//                                    sideMenu_mangement();
                                 }else {
                                     update();
-                                    sideMenu_mangement();
+//                                    sideMenu_mangement();
                                 }
                             } else {
                                 update();
@@ -139,7 +137,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         update();
-                        sideMenu_mangement();
+//                        sideMenu_mangement();
                         System.out.println(error);
                         Toast.makeText(MainActivity.this, "It is currently offline.", Toast.LENGTH_LONG).show();
                     }
@@ -149,6 +147,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 queue.add(postRequest);
             }
         });
+        sideMenu_mangement();
     }
 
     private void update(){
@@ -180,7 +179,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         jsonObject = new JSONObject(response);
                         result = jsonObject.getString("success");
                         if (result.equals("true")){
-                            loading.setVisibility(View.GONE);
+//                            loading.setVisibility(View.GONE);
                             ElemnetList = jsonObject.getJSONArray("forms");
 //                            System.out.println(ElemnetList);
                             for(int j = 0; j < ElemnetList.length(); j++){
@@ -196,7 +195,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             }
 
                         } else {
-                            loading.setVisibility(View.GONE);
+//                            loading.setVisibility(View.GONE);
                             Toast.makeText(MainActivity.this, "Oops, Request failed..", Toast.LENGTH_LONG).show();
                         }
                     } catch (JSONException e) {
@@ -206,9 +205,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    loading.setVisibility(View.GONE);
+//                    loading.setVisibility(View.GONE);
                     ListviewManagement();
-                    sideMenu_mangement();
+//                    sideMenu_mangement();
                     System.out.println(error);
                     Toast.makeText(MainActivity.this, "It is currently offline.", Toast.LENGTH_LONG).show();
                 }
@@ -246,17 +245,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             }
                             elementSave();
                             ListviewManagement();
-                            loading.setVisibility(View.GONE);
-                            sideMenu_mangement();
+//                            loading.setVisibility(View.GONE);
+//                            sideMenu_mangement();
                         }else {
                             ListviewManagement();
-                            loading.setVisibility(View.GONE);
-                            sideMenu_mangement();
+//                            loading.setVisibility(View.GONE);
+//                            sideMenu_mangement();
                         }
                     } else {
                         ListviewManagement();
-                        loading.setVisibility(View.GONE);
-                        sideMenu_mangement();
+//                        loading.setVisibility(View.GONE);
+//                        sideMenu_mangement();
                         Toast.makeText(MainActivity.this, "Oops, can't login! please try to login again.", Toast.LENGTH_LONG).show();
                     }
                 } catch (JSONException e) {
@@ -266,7 +265,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                loading.setVisibility(View.GONE);
+//                loading.setVisibility(View.GONE);
                 ListviewManagement();
                 sideMenu_mangement();
                 System.out.println(error);

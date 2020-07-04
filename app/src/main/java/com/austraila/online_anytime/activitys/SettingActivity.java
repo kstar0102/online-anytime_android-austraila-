@@ -15,7 +15,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -25,6 +24,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.austraila.online_anytime.LocalManage.DatabaseHelper;
 import com.austraila.online_anytime.R;
+import com.austraila.online_anytime.activitys.LoginDepartment.LoginActivity;
 import com.google.android.material.navigation.NavigationView;
 
 import java.text.DateFormat;
