@@ -17,6 +17,9 @@
     <string name="forget_button">FORGOT</string>
     <string name="forget_signin">Sign in</string>
     <string name="forget_display">We will send the link for reset password to your email</string>
+    <string name="code_title">Verification code</string>
+    <string name="code_des">Please type the verification code.</string>
+    <string name="code_btn">Continue</string>
 
 <!--    main activity-->
     <string name="main_title">Form submission</string>

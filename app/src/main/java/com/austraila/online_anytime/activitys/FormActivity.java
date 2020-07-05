@@ -21,6 +21,7 @@ import android.text.InputType;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -67,6 +68,8 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
     private SQLiteDatabase db;
     private SQLiteOpenHelper openHelper;
     ArrayList<String> data = new ArrayList<String>();
+    public int checkpage = 1;
+    String max;
 
     @SuppressLint("ResourceType")
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -103,17 +106,45 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
                 startActivity(intent);
             }
         });
-
         //get title and des form main activity
         formid = getIntent().getStringExtra("id");
         formDes = getIntent().getStringExtra("des");
         formtitle = getIntent().getStringExtra("title");
 
+        ArrayList<String> groupkeyList = new ArrayList<String>();
+        cursor = db.rawQuery("SELECT *FROM " + ElementDatabaseHelper.ElEMENTTABLE_NAME + " WHERE " + ElementDatabaseHelper.ECOL_10 + "=?", new String[]{formid});
+        if (cursor.moveToFirst()){
+            do{
+                String keydate = cursor.getString(cursor.getColumnIndex("element_page_number"));
+                if(!groupkeyList.contains(keydate)){
+                    groupkeyList.add(keydate);
+                }else{
+                    continue;
+                }
+            }while(cursor.moveToNext());
+        }
+        cursor.close();
+
+        max = groupkeyList.get(0);
+
+        for (int i = 1; i < groupkeyList.size(); i++) {
+            if (Integer.parseInt(groupkeyList.get(i)) > Integer.parseInt(max)) {
+                max = groupkeyList.get(i);
+            }
+        }
+        System.out.println(max);
+
         //make the Page title
         setTextTitle();
 
+        //show the element.
+        showElement(checkpage);
+    }
 
-        cursor = db.rawQuery("SELECT *FROM " + ElementDatabaseHelper.ElEMENTTABLE_NAME + " WHERE " + ElementDatabaseHelper.ECOL_10 + "=?", new String[]{formid});
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void showElement(int i) {
+
+        cursor = db.rawQuery("SELECT *FROM " + ElementDatabaseHelper.ElEMENTTABLE_NAME + " WHERE " + ElementDatabaseHelper.ECOL_10 + "=? AND " + ElementDatabaseHelper.ECOL_7 + "=?", new String[]{formid, String.valueOf(i)});
         System.out.println(cursor.getCount());
         if (cursor.moveToFirst()){
             do{
@@ -171,18 +202,18 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
                         ParagraphText(cursor.getString(cursor.getColumnIndex("element_title")));
                         break;
                     case "page_break":
-                        page_break(cursor.getString(cursor.getColumnIndex("element_submit_primary_text")));
+                        page_break(i);
                         break;
                     case "section":
                         SectionBreak(cursor.getString(cursor.getColumnIndex("element_title")), cursor.getString(cursor.getColumnIndex("element_guidelines")));
                 }
             }while(cursor.moveToNext());
         }
-        System.out.println(formid);
-        System.out.println(data);
         cursor.close();
 
-        submitButton();
+        if(i == Integer.parseInt(max)){
+            submitButton();
+        }
     }
 
     private void submitButton() {
@@ -773,7 +804,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         linearLayout.addView(priceLinerlayout);
     }
 
-    private void page_break(String title){
+    private void page_break(final int showcheckbtn){
         LinearLayout btnlinearLayout =new LinearLayout(this);
         LinearLayout.LayoutParams btnLinerParam = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -783,20 +814,42 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         btnlinearLayout.setOrientation(LinearLayout.HORIZONTAL);
         btnlinearLayout.setLayoutParams(btnLinerParam);
 
+
         Button nextbutton = new Button(this);
         Button prebutton =new Button(this);
         LinearLayout.LayoutParams btnparams = new LinearLayout.LayoutParams(300, 120);
         btnparams.setMargins(10,20,10,5);
 
-        nextbutton.setText("Previous");
+        nextbutton.setText("Continue");
         nextbutton.setLayoutParams(btnparams);
 
 
-        prebutton.setText(title);
+        prebutton.setText("Previous");
         prebutton.setLayoutParams(btnparams);
+
         btnlinearLayout.addView(nextbutton);
         btnlinearLayout.addView(prebutton);
 
+        if(showcheckbtn < 2 ){
+            prebutton.setVisibility(View.GONE);
+        }
+        nextbutton.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
+            @Override
+            public void onClick(View v) {
+                linearLayout.removeAllViewsInLayout();
+                showElement(showcheckbtn +1 );
+            }
+        });
+
+        prebutton.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
+            @Override
+            public void onClick(View v) {
+                linearLayout.removeAllViewsInLayout();
+                showElement(showcheckbtn - 1 );
+            }
+        });
         linearLayout.addView(btnlinearLayout);
     }
 

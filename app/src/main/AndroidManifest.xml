@@ -39,6 +39,8 @@
         <activity android:name=".activitys.SettingActivity"/>
         <activity android:name=".activitys.cameraActivity.CameraActivity" />
         <activity android:name=".activitys.SuccessActivity"/>
+        <activity android:name=".activitys.LoginDepartment.CodeCheckActivity"/>
+        <activity android:name=".activitys.LoginDepartment.NewRegisterActivity"/>
         <activity android:name=".activitys.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

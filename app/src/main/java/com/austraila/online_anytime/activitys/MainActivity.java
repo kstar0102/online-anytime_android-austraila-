@@ -167,10 +167,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void elementSave() throws JSONException {
-        System.out.println(ApiList.length());
         for (int i = 0; i < ApiList.length(); i ++){
             final String formId = ApiList.getJSONObject(i).getString("form_id");
-            System.out.println(formId);
             StringRequest postRequest = new StringRequest(Request.Method.GET, Common.getInstance().getFormelementUrl() + formId + Common.getInstance().getApiKey(), new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
@@ -181,7 +179,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         if (result.equals("true")){
 //                            loading.setVisibility(View.GONE);
                             ElemnetList = jsonObject.getJSONArray("forms");
-//                            System.out.println(ElemnetList);
                             for(int j = 0; j < ElemnetList.length(); j++){
                                 insertElementData(ElemnetList.getJSONObject(j).getString("element_id")
                                         ,ElemnetList.getJSONObject(j).getString("element_title")
@@ -189,7 +186,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                         ,ElemnetList.getJSONObject(j).getString("element_type")
                                         ,ElemnetList.getJSONObject(j).getString("element_position")
                                         ,ElemnetList.getJSONObject(j).getString("element_page_number")
-                                        ,ElemnetList.getJSONObject(j).getString("element_submit_primary_text")
+                                        ,ElemnetList.getJSONObject(j).getString("element_default_value")
                                         ,ElemnetList.getJSONObject(j).getString("element_submit_secondary_text")
                                         ,formId);
                             }
@@ -404,7 +401,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Db.insert(FormDatabaeHelper.FORMTABLE_NAME,null,contentValues);
     }
 
-    public void insertElementData(String element_id,String element_title, String element_guidelines, String element_type, String element_position, String element_page_number, String element_submit_primary_text, String element_submit_secondary_text, String formid){
+    public void insertElementData(String element_id,String element_title, String element_guidelines, String element_type, String element_position, String element_page_number, String element_default_value, String element_submit_secondary_text, String formid){
         ContentValues contentValues = new ContentValues();
         contentValues.put(ElementDatabaseHelper.ECOL_2, element_id);
         contentValues.put(ElementDatabaseHelper.ECOL_3, element_title);
@@ -412,9 +409,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         contentValues.put(ElementDatabaseHelper.ECOL_5, element_type);
         contentValues.put(ElementDatabaseHelper.ECOL_6, element_position);
         contentValues.put(ElementDatabaseHelper.ECOL_7, element_page_number);
-        contentValues.put(ElementDatabaseHelper.ECOL_8, element_submit_primary_text);
+        contentValues.put(ElementDatabaseHelper.ECOL_8, element_default_value);
         contentValues.put(ElementDatabaseHelper.ECOL_9, element_submit_secondary_text);
         contentValues.put(ElementDatabaseHelper.ECOL_10, formid);
+        System.out.println(contentValues);
         EDb.insert(ElementDatabaseHelper.ElEMENTTABLE_NAME,null,contentValues);
     }
 

@@ -12,6 +12,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.austraila.online_anytime.R;
+import com.austraila.online_anytime.activitys.FormActivity;
 
 public class ForgetActivity extends AppCompatActivity {
     Button Forgetbtn;
@@ -33,18 +34,20 @@ public class ForgetActivity extends AppCompatActivity {
                     Toast.makeText(ForgetActivity.this, "Enter your Email to send", Toast.LENGTH_LONG).show();
                     return;
                 }
-                AlertDialog alertDialog = new AlertDialog.Builder(ForgetActivity.this).create();
-                alertDialog.setTitle("Notice");
-                alertDialog.setMessage("It was sent successfully.");
-                alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "OK",
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                                startActivity(intent);
-                            }
-                        });
-                alertDialog.show();
+                Intent intent = new Intent(ForgetActivity.this, CodeCheckActivity.class);
+                startActivity(intent);
+//                AlertDialog alertDialog = new AlertDialog.Builder(ForgetActivity.this).create();
+//                alertDialog.setTitle("Notice");
+//                alertDialog.setMessage("It was sent successfully.");
+//                alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "OK",
+//                        new DialogInterface.OnClickListener() {
+//                            @Override
+//                            public void onClick(DialogInterface dialog, int which) {
+//                                dialog.dismiss();
+//
+//                            }
+//                        });
+//                alertDialog.show();
             }
         });
     }

@@ -10,27 +10,28 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.austraila.online_anytime.R;
 
-public class CodeCheckActivity extends AppCompatActivity {
-    EditText num_1, num_2, num_3, num_4;
+public class NewRegisterActivity extends AppCompatActivity {
+    EditText register_name, register_email, register_password;
+    Button register_btn;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_codecheck);
+        setContentView(R.layout.activity_register);
 
         getSupportActionBar().hide();
 
-        num_1 = findViewById(R.id.number_1);
-        num_2 = findViewById(R.id.number_2);
-        num_3 = findViewById(R.id.number_3);
-        num_4 = findViewById(R.id.number_4);
+        register_btn = findViewById(R.id.register_btn);
+        register_name = findViewById(R.id.register_name);
+        register_email = findViewById(R.id.register_email);
+        register_password = findViewById(R.id.register_password);
 
-        Button continueBtn = findViewById(R.id.code_continue_btn);
-        continueBtn.setOnClickListener(new View.OnClickListener() {
+        register_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(CodeCheckActivity.this, NewRegisterActivity.class);
+                Intent intent = new Intent(NewRegisterActivity.this, LoginActivity.class);
                 startActivity(intent);
             }
         });
+
     }
 }
