@@ -6,11 +6,13 @@ public class Common {
     private String TestbaseUrl = "http://192.168.107.90:89/";
     private String mainItemUrl = "forms";
     private String formelementUrl = "http://192.168.107.90:89/form_elements/";
+    private String elemnetOptionUrl = "http://192.168.107.90:89/form_elements_options";
 
 //    private String TestloginUrl = "http://online-anytime.com.au/olat/newapi/login";
 //    private String TestbaseUrl = "http://online-anytime.com.au/olat/newapi/";
 //    private String mainItemUrl = "forms";
 //    private String formelementUrl = "http://online-anytime.com.au/olat/newapi/form_elements/";
+//    private String elemnetOptionUrl = "http://online-anytime.com.au/olat/newapi/form_elements_options";
 
 
     private static Common instance = new Common();
@@ -32,4 +34,8 @@ public class Common {
     }
 
     public String getMainItemUrl() { return TestbaseUrl + mainItemUrl + ApiKey;}
+
+    public String getElemnetOptionUrl() {
+        return elemnetOptionUrl;
+    }
 }

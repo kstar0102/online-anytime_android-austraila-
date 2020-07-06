@@ -43,6 +43,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.austraila.online_anytime.Common.CustomScrollview;
 import com.austraila.online_anytime.LocalManage.ElementDatabaseHelper;
+import com.austraila.online_anytime.LocalManage.ElementOptionDatabaseHelper;
 import com.austraila.online_anytime.R;
 import com.austraila.online_anytime.Common.AddPhotoBottomDialogFragment;
 import com.austraila.online_anytime.activitys.signature.SignatureView;
@@ -63,10 +64,10 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
     SignatureView signatureView;
     Bitmap photo;
     CustomScrollview customScrollview;
-    Cursor cursor;
+    Cursor cursor, optionCursor;
     String formid, formDes, formtitle;
-    private SQLiteDatabase db;
-    private SQLiteOpenHelper openHelper;
+    private SQLiteDatabase db,ODb;
+    private SQLiteOpenHelper openHelper,ElementOptionopenHelper;
     ArrayList<String> data = new ArrayList<String>();
     public int checkpage = 1;
     String max;
@@ -80,7 +81,9 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         getSupportActionBar().hide();
 
         openHelper = new ElementDatabaseHelper(this);
+        ElementOptionopenHelper = new ElementOptionDatabaseHelper(this);
         db = openHelper.getReadableDatabase();
+        ODb = ElementOptionopenHelper.getReadableDatabase();
 
         customScrollview = (CustomScrollview) findViewById(R.id.scrollmain);
         customScrollview.setEnableScrolling(true);
@@ -190,7 +193,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
                         CheckBoxes(cursor.getString(cursor.getColumnIndex("element_title")));
                         break;
                     case "radio":
-                        MultipleChoice(cursor.getString(cursor.getColumnIndex("element_title")));
+                        MultipleChoice(cursor.getString(cursor.getColumnIndex("element_title")), cursor.getString(cursor.getColumnIndex("element_id")));
                         break;
                     case "time":
                         TimeLint(cursor.getString(cursor.getColumnIndex("element_title")));
@@ -940,7 +943,21 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         linearLayout.addView(textArea);
     }
 
-    private void MultipleChoice(String title) {
+    private void MultipleChoice(String title, String id) {
+        ArrayList<String> mylist = new ArrayList<String>();
+
+        Cursor cursor = ODb.rawQuery("SELECT *FROM " + ElementOptionDatabaseHelper.OPTIONTABLE_NAME + " WHERE " + ElementOptionDatabaseHelper.OCOL_2 + "=? AND " + ElementOptionDatabaseHelper.OCOL_3 + "=?" , new String[]{formid, id});
+
+        if(cursor.moveToFirst()){
+            do{
+                String data = cursor.getString(cursor.getColumnIndex("OOption"));
+                mylist.add(data);
+                System.out.println(data);
+            }while (cursor.moveToNext());
+
+        }
+        cursor.close();
+
         // define the radio group and title
         TextView radiotitle = new TextView(this);
         RadioGroup radioGroup = new RadioGroup(this);
@@ -957,11 +974,10 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         );
         radiogroupparams.setMargins(50,5,50, 0);
 
-        String[] ab ={"radio1","radio2"};
         //radio button add
-        for (int i = 0; i < ab.length; i ++){
+        for (int i = 0; i < mylist.size(); i ++){
             RadioButton radioButtonView = new RadioButton(this);
-            radioButtonView.setText(ab[i]);
+            radioButtonView.setText(mylist.get(i));
             radioGroup.addView(radioButtonView, radiogroupparams);
         }
 

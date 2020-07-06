@@ -31,6 +31,7 @@ import com.android.volley.toolbox.Volley;
 import com.austraila.online_anytime.Common.Common;
 import com.austraila.online_anytime.LocalManage.DatabaseHelper;
 import com.austraila.online_anytime.LocalManage.ElementDatabaseHelper;
+import com.austraila.online_anytime.LocalManage.ElementOptionDatabaseHelper;
 import com.austraila.online_anytime.LocalManage.FormDatabaeHelper;
 import com.austraila.online_anytime.R;
 import com.austraila.online_anytime.activitys.LoginDepartment.LoginActivity;
@@ -49,13 +50,14 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, SearchView.OnQueryTextListener {
     private DrawerLayout drawer;
     private NavigationView navigation;
-    private SQLiteDatabase db,Db,EDb;
-    private SQLiteOpenHelper openHelper,FormopenHelper,ElementopenHelper;
+    private SQLiteDatabase db,Db,EDb,ODb;
+    private SQLiteOpenHelper openHelper,FormopenHelper,ElementopenHelper,ElementOptionopenHelper;
     RelativeLayout loading;
     ListView listView;
     ArrayList Listitem=new ArrayList<>();
     JSONArray ApiList = new JSONArray();
     JSONArray ElemnetList = new JSONArray();
+    JSONArray ElemnetOptionList = new JSONArray();
     SearchView searchView;
     String useremail, result, checksum;
     CustomAdapter myAdapter;
@@ -82,9 +84,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         openHelper = new DatabaseHelper(this);
         FormopenHelper = new FormDatabaeHelper(this);
         ElementopenHelper = new ElementDatabaseHelper(this);
+        ElementOptionopenHelper = new ElementOptionDatabaseHelper(this);
         db = openHelper.getWritableDatabase();
         Db = FormopenHelper.getWritableDatabase();
         EDb = ElementopenHelper.getWritableDatabase();
+        ODb = ElementOptionopenHelper.getWritableDatabase();
 
 //        loading.setVisibility(View.VISIBLE);
         init();
@@ -94,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onClick(View v) {
                 final Cursor fcursor = Db.rawQuery("SELECT *FROM " + FormDatabaeHelper.FORMTABLE_NAME,  null);
-
+                loading.setVisibility(View.VISIBLE);
                 //Connect the Api
                 String url = Common.getInstance().getMainItemUrl();
                 StringRequest postRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
@@ -111,21 +115,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 if(checksum != Apichecksum){
                                     Db.execSQL("delete from "+ FormDatabaeHelper.FORMTABLE_NAME);
                                     EDb.execSQL("delete from "+ ElementDatabaseHelper.ElEMENTTABLE_NAME);
+                                    ODb.execSQL("delete from "+ ElementOptionDatabaseHelper.OPTIONTABLE_NAME);
                                     for(int i = 0; i < ApiList.length(); i++){
                                         insertData(ApiList.getJSONObject(i).getString("form_name")
                                                 ,ApiList.getJSONObject(i).getString("form_id")
-                                                , Apichecksum
+                                                ,Apichecksum
                                                 ,ApiList.getJSONObject(i).getString("form_description"));
                                     }
                                     elementSave();
+                                    elementOptionSave();
                                     update();
-//                                    sideMenu_mangement();
+                                    loading.setVisibility(View.GONE);
                                 }else {
                                     update();
-//                                    sideMenu_mangement();
+                                    loading.setVisibility(View.GONE);
                                 }
                             } else {
                                 update();
+                                loading.setVisibility(View.GONE);
                                 sideMenu_mangement();
                                 Toast.makeText(MainActivity.this, "Oops, can't login! please try to login again.", Toast.LENGTH_LONG).show();
                             }
@@ -137,7 +144,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         update();
-//                        sideMenu_mangement();
+                        loading.setVisibility(View.GONE);
                         System.out.println(error);
                         Toast.makeText(MainActivity.this, "It is currently offline.", Toast.LENGTH_LONG).show();
                     }
@@ -147,6 +154,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 queue.add(postRequest);
             }
         });
+
         sideMenu_mangement();
     }
 
@@ -215,9 +223,51 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    private void init() {
-        final Cursor fcursor = Db.rawQuery("SELECT *FROM " + FormDatabaeHelper.FORMTABLE_NAME,  null);
+    private void elementOptionSave() {
+            StringRequest postRequest = new StringRequest(Request.Method.GET, Common.getInstance().getElemnetOptionUrl() + Common.getInstance().getApiKey(), new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    JSONObject jsonObject = null;
+                    try {
+                        jsonObject = new JSONObject(response);
+                        result = jsonObject.getString("success");
+                        if (result.equals("true")){
+                            ElemnetOptionList = jsonObject.getJSONArray("forms");
+                            for(int j = 0; j < ElemnetOptionList.length(); j++){
 
+                                insertElementOptionData(ElemnetOptionList.getJSONObject(j).getString("form_id")
+                                        ,ElemnetOptionList.getJSONObject(j).getString("element_id")
+                                        ,ElemnetOptionList.getJSONObject(j).getString("option_id")
+                                        ,ElemnetOptionList.getJSONObject(j).getString("position")
+                                        ,ElemnetOptionList.getJSONObject(j).getString("option")
+                                        ,ElemnetOptionList.getJSONObject(j).getString("option_is_default"));
+                            }
+                        } else {
+//                            loading.setVisibility(View.GONE);
+                            Toast.makeText(MainActivity.this, "Oops, Request failed..", Toast.LENGTH_LONG).show();
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+//                    loading.setVisibility(View.GONE);
+                    ListviewManagement();
+//                    sideMenu_mangement();
+                    System.out.println(error);
+                    Toast.makeText(MainActivity.this, "It is currently offline.", Toast.LENGTH_LONG).show();
+                }
+            }){
+            };
+            queue = Volley.newRequestQueue(MainActivity.this);
+            queue.add(postRequest);
+    }
+
+    private void init() {
+        loading = findViewById(R.id.loadingLayout);
+        loading.setVisibility(View.VISIBLE);
         //Connect the Api
         String url = Common.getInstance().getMainItemUrl();
         StringRequest postRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
@@ -234,6 +284,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         if(checksum != Apichecksum){
                             Db.execSQL("delete from "+ FormDatabaeHelper.FORMTABLE_NAME);
                             EDb.execSQL("delete from "+ ElementDatabaseHelper.ElEMENTTABLE_NAME);
+                            ODb.execSQL("delete from "+ ElementOptionDatabaseHelper.OPTIONTABLE_NAME);
                             for(int i = 0; i < ApiList.length(); i++){
                                 insertData(ApiList.getJSONObject(i).getString("form_name")
                                         ,ApiList.getJSONObject(i).getString("form_id")
@@ -241,18 +292,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                         ,ApiList.getJSONObject(i).getString("form_description"));
                             }
                             elementSave();
+                            elementOptionSave();
                             ListviewManagement();
-//                            loading.setVisibility(View.GONE);
-//                            sideMenu_mangement();
+                            loading.setVisibility(View.GONE);
                         }else {
                             ListviewManagement();
-//                            loading.setVisibility(View.GONE);
-//                            sideMenu_mangement();
+                            loading.setVisibility(View.GONE);
                         }
                     } else {
                         ListviewManagement();
-//                        loading.setVisibility(View.GONE);
-//                        sideMenu_mangement();
+                        loading.setVisibility(View.GONE);
                         Toast.makeText(MainActivity.this, "Oops, can't login! please try to login again.", Toast.LENGTH_LONG).show();
                     }
                 } catch (JSONException e) {
@@ -262,9 +311,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-//                loading.setVisibility(View.GONE);
+                loading.setVisibility(View.GONE);
                 ListviewManagement();
-                sideMenu_mangement();
                 System.out.println(error);
                 Toast.makeText(MainActivity.this, "It is currently offline.", Toast.LENGTH_LONG).show();
             }
@@ -294,6 +342,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        navigationView.bringToFront();
 
         findViewById(R.id.menu_btn).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -412,8 +461,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         contentValues.put(ElementDatabaseHelper.ECOL_8, element_default_value);
         contentValues.put(ElementDatabaseHelper.ECOL_9, element_submit_secondary_text);
         contentValues.put(ElementDatabaseHelper.ECOL_10, formid);
-        System.out.println(contentValues);
         EDb.insert(ElementDatabaseHelper.ElEMENTTABLE_NAME,null,contentValues);
+    }
+
+    public void insertElementOptionData(String form_id, String element_id, String option_id, String position, String option, String option_is_default){
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(ElementOptionDatabaseHelper.OCOL_2, form_id);
+        contentValues.put(ElementOptionDatabaseHelper.OCOL_3, element_id);
+        contentValues.put(ElementOptionDatabaseHelper.OCOL_4, option_id);
+        contentValues.put(ElementOptionDatabaseHelper.OCOL_5, position);
+        contentValues.put(ElementOptionDatabaseHelper.OCOL_6, option);
+        contentValues.put(ElementOptionDatabaseHelper.OCOL_7, option_is_default);
+        ODb.insert(ElementOptionDatabaseHelper.OPTIONTABLE_NAME,null,contentValues);
     }
 
 }
