@@ -71,12 +71,12 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
     ArrayList<String> data = new ArrayList<String>();
     public int checkpage = 1;
     String max;
+    TextView next_btn;
 
     @SuppressLint("ResourceType")
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        TextView next_btn;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_formtest);
         getSupportActionBar().hide();
@@ -108,8 +108,6 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         backTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                Intent intent = new Intent(FormActivity.this, MainActivity.class);
-//                startActivity(intent);
                 onBackPressed();
             }
         });
@@ -139,10 +137,6 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
                 max = groupkeyList.get(i);
             }
         }
-        System.out.println(max);
-
-        //make the Page title
-        setTextTitle();
 
         //show the element.
         showElement(checkpage);
@@ -150,7 +144,9 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void showElement(int i) {
-
+        customScrollview.fullScroll(CustomScrollview.FOCUS_UP);
+        //make the Page title
+        setTextTitle();
 
         cursor = db.rawQuery("SELECT *FROM " + ElementDatabaseHelper.ElEMENTTABLE_NAME + " WHERE " + ElementDatabaseHelper.ECOL_11 + "=? AND " + ElementDatabaseHelper.ECOL_7 + "=?", new String[]{formid, String.valueOf(i)});
         System.out.println(cursor.getCount());
@@ -173,7 +169,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
                     case "money":
                         PriceLint(cursor.getString(cursor.getColumnIndex("element_title")));
                         break;
-                    case "title":
+                    case "text":
                         SingleLineTest(cursor.getString(cursor.getColumnIndex("element_title")));
                         break;
                     case "signature":
@@ -224,9 +220,18 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
             }while(cursor.moveToNext());
         }
         cursor.close();
+        System.out.println(data);
 
         if(i == Integer.parseInt(max)){
             submitButton();
+            next_btn.setText("Submit");
+            next_btn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(FormActivity.this, SuccessActivity.class);
+                    startActivity(intent);
+                }
+            });
         }
     }
 
@@ -239,7 +244,6 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
             do{
                 String data = cursor.getString(cursor.getColumnIndex("OOption"));
                 matrixList.add(data);
-                System.out.println(data);
             }while (cursor.moveToNext());
 
         }
@@ -1135,12 +1139,15 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
             prebutton.setVisibility(View.GONE);
         }
 
-//        if(showcheckbtn < Integer.parseInt(max)){
-//            TextView next_btn = findViewById(R.id.next_textBtn);
-//            next_btn.setText("Next");
-//        }else {
-//            next
-//        }
+        next_btn.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
+            @Override
+            public void onClick(View v) {
+                linearLayout.removeAllViewsInLayout();
+                showElement(showcheckbtn +1 );
+            }
+        });
+
         nextbutton.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
@@ -1257,7 +1264,6 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
             do{
                 String data = cursor.getString(cursor.getColumnIndex("OOption"));
                 mylist.add(data);
-                System.out.println(data);
             }while (cursor.moveToNext());
 
         }
