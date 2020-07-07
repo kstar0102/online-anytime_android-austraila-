@@ -40,6 +40,7 @@ import android.widget.Toast;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.austraila.online_anytime.Common.Common;
 import com.austraila.online_anytime.Common.CustomScrollview;
 import com.austraila.online_anytime.LocalManage.ElementDatabaseHelper;
 import com.austraila.online_anytime.LocalManage.ElementOptionDatabaseHelper;
@@ -191,7 +192,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
                         DateLint(cursor.getString(cursor.getColumnIndex("element_title")));
                         break;
                     case "select":
-                        DropDown(cursor.getString(cursor.getColumnIndex("element_title")));
+                        DropDown(cursor.getString(cursor.getColumnIndex("element_title")), cursor.getString(cursor.getColumnIndex("element_id")));
                         break;
                     case "checkbox":
                         CheckBoxes(cursor.getString(cursor.getColumnIndex("element_title")), cursor.getString(cursor.getColumnIndex("element_id")));
@@ -214,6 +215,9 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
                     case "address":
                         AddressLint(cursor.getString(cursor.getColumnIndex("element_title")), cursor.getInt(cursor.getColumnIndex("element_address_hideline2")));
                         break;
+                    case "matrix":
+                        matrixLint(cursor.getString(cursor.getColumnIndex("element_title")), cursor.getString(cursor.getColumnIndex("element_guidelines")), cursor.getString(cursor.getColumnIndex("element_id")));
+                        break;
                     case "section":
                         SectionBreak(cursor.getString(cursor.getColumnIndex("element_title")), cursor.getString(cursor.getColumnIndex("element_guidelines")));
                 }
@@ -224,6 +228,110 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         if(i == Integer.parseInt(max)){
             submitButton();
         }
+    }
+
+    private void matrixLint(String title, String guidelines, String id) {
+
+        ArrayList<String> matrixList = new ArrayList<String>();
+        Cursor cursor = ODb.rawQuery("SELECT *FROM " + ElementOptionDatabaseHelper.OPTIONTABLE_NAME + " WHERE " + ElementOptionDatabaseHelper.OCOL_2 + "=? AND " + ElementOptionDatabaseHelper.OCOL_3 + "=?" , new String[]{formid, id});
+
+        if(cursor.moveToFirst()){
+            do{
+                String data = cursor.getString(cursor.getColumnIndex("OOption"));
+                matrixList.add(data);
+                System.out.println(data);
+            }while (cursor.moveToNext());
+
+        }
+        cursor.close();
+
+        LinearLayout.LayoutParams matrixParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        matrixParams.setMargins(50,20,50,5);
+        LinearLayout matrixLayout = new LinearLayout(this);
+        matrixLayout.setOrientation(LinearLayout.HORIZONTAL);
+        matrixLayout.setLayoutParams(matrixParams);
+
+        LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(500, LinearLayout.LayoutParams.WRAP_CONTENT);
+        titleParams.setMargins(0,0,10,0);
+        LinearLayout titlelayout = new LinearLayout(this);
+        titlelayout.setOrientation(LinearLayout.VERTICAL);
+        titlelayout.setWeightSum(1);
+        titlelayout.setLayoutParams(titleParams);
+
+        LinearLayout.LayoutParams itemParams = new LinearLayout.LayoutParams(550, LinearLayout.LayoutParams.WRAP_CONTENT);
+        itemParams.setMargins(10,0,0,0);
+        LinearLayout itemLayout = new LinearLayout(this);
+        itemLayout.setLayoutParams(itemParams);
+        itemLayout.setWeightSum(1);
+        itemLayout.setOrientation(LinearLayout.HORIZONTAL);
+
+        matrixLayout.addView(titlelayout);
+        matrixLayout.addView(itemLayout);
+
+        TextView matrixTitle = new TextView(this);
+        titleTextview(matrixTitle);
+
+        LinearLayout headLayout = new LinearLayout(this);
+        LinearLayout.LayoutParams headLayoutParam = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        headLayoutParam.setMargins(50,20,50,10);
+        headLayout.setLayoutParams(headLayoutParam);
+        headLayout.setOrientation(LinearLayout.HORIZONTAL);
+        LinearLayout empty = new LinearLayout(this);
+        LinearLayout headtitle = new LinearLayout(this);
+        LinearLayout.LayoutParams emptyParam = new LinearLayout.LayoutParams(
+                450, LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        emptyParam.setMargins(10,0,0,0);
+        empty.setLayoutParams(emptyParam);
+        headLayout.addView(empty);
+        headLayout.addView(headtitle);
+
+
+
+        if(guidelines.isEmpty()){
+            matrixTitle.setVisibility(View.GONE);
+        }else {
+            matrixTitle.setText(guidelines);
+            linearLayout.addView(matrixTitle);
+            linearLayout.addView(headLayout);
+
+            for(int i = 0; i < matrixList.size(); i ++){
+                TextView itemtext = new TextView(this);
+                titleTextview(itemtext);
+                itemtext.setTextSize(getResources().getDimension(R.dimen.textsize_normal));
+                itemtext.setWidth(140);
+                itemtext.setText(matrixList.get(i));
+                headtitle.addView(itemtext);
+            }
+        }
+
+        TextView titleText = new TextView(this);
+        titleTextview(titleText);
+        titleText.setTextSize(getResources().getDimension(R.dimen.textsize_normal));
+        titleText.setText(title);
+        titlelayout.addView(titleText);
+
+        RadioGroup radioGroup = new RadioGroup(this);
+        radioGroup.setOrientation(LinearLayout.HORIZONTAL);
+        LinearLayout.LayoutParams radiogroupparams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        radiogroupparams.setMargins(50,5,10, 0);
+        for (int i = 0; i < matrixList.size(); i ++){
+            RadioButton radioButtonView = new RadioButton(this);
+            radioGroup.addView(radioButtonView, radiogroupparams);
+        }
+
+        itemLayout.addView(radioGroup);
+
+        linearLayout.addView(matrixLayout);
     }
 
     private void AddressLint(String title, int address) {
@@ -355,8 +463,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         postal.addView(postalEdit);
         postal.addView(postalText);
 
-
-        String[] countryArray = {"qwe","zcxv","sdf","fdgh"};
+        Common common = new Common();
         LinearLayout.LayoutParams dropdownParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -366,9 +473,10 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         countrydrop.setLayoutParams(dropdownParams);
         countrydrop.setBackground(getResources().getDrawable(R.drawable.editview_border));
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.spinner_dropdown_item, countryArray);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.spinner_dropdown_item, common.countryArray);
         adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         countrydrop.setAdapter(adapter);
+        countrydrop.setSelection(3);
         countrydrop.setOnItemSelectedListener(this);
 
         TextView countryText = new TextView(this);
@@ -777,14 +885,27 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
 
     }
 
-    private void DropDown(String title) {
+    private void DropDown(String title, String id) {
+
+        ArrayList<String> dropList = new ArrayList<String>();
+        Cursor cursor = ODb.rawQuery("SELECT *FROM " + ElementOptionDatabaseHelper.OPTIONTABLE_NAME + " WHERE " + ElementOptionDatabaseHelper.OCOL_2 + "=? AND " + ElementOptionDatabaseHelper.OCOL_3 + "=?" , new String[]{formid, id});
+
+        if(cursor.moveToFirst()){
+            do{
+                String data = cursor.getString(cursor.getColumnIndex("OOption"));
+                dropList.add(data);
+                System.out.println(data);
+            }while (cursor.moveToNext());
+
+        }
+        cursor.close();
+
         //define the dropdown title
         TextView dropTitle = new TextView(this);
         titleTextview(dropTitle);
         dropTitle.setText(Html.fromHtml(title));
         linearLayout.addView(dropTitle);
 
-        String[] users = {"Suresh Dasari", "Trishika Dasari", "Rohini Alavala", "Praveen Kumar", "Madhav Sai"};
         //define the spinner
         LinearLayout.LayoutParams dropdownParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -795,7 +916,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         dropdown.setLayoutParams(dropdownParams);
         dropdown.setBackground(getResources().getDrawable(R.drawable.editview_border));
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.spinner_dropdown_item, users);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.spinner_dropdown_item, dropList);
         adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         dropdown.setAdapter(adapter);
         dropdown.setOnItemSelectedListener(this);
