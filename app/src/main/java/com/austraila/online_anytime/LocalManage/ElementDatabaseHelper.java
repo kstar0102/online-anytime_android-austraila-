@@ -17,8 +17,9 @@ public class ElementDatabaseHelper extends SQLiteOpenHelper {
     public static final String ECOL_6 = "element_position";
     public static final String ECOL_7 = "element_page_number";
     public static final String ECOL_8 = "element_default_value";
-    public static final String ECOL_9 = "element_submit_secondary_text";
-    public static final String ECOL_10 = "formid";
+    public static final String ECOL_9 = "element_constraint";
+    public static final String ECOL_10 = "element_address_hideline2";
+    public static final String ECOL_11 = "formid";
 
     public ElementDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, 1);
@@ -26,7 +27,7 @@ public class ElementDatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE " + ElEMENTTABLE_NAME + " (EID INTEGER PRIMARY KEY AUTOINCREMENT,element_id TEXT,element_title TEXT,element_guidelines TEXT,element_type TEXT,element_position TEXT,element_page_number TEXT,element_default_value TEXT,element_submit_secondary_text TEXT,formid TEXT)");
+        db.execSQL("CREATE TABLE " + ElEMENTTABLE_NAME + " (EID INTEGER PRIMARY KEY AUTOINCREMENT,element_id TEXT,element_title TEXT,element_guidelines TEXT,element_type TEXT,element_position TEXT,element_page_number TEXT,element_default_value TEXT,element_constraint TEXT, element_address_hideline2 TEXT ,formid TEXT)");
     }
 
     @Override

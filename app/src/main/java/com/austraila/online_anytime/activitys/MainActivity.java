@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.MenuItem;
@@ -78,7 +79,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         listView = findViewById(R.id.mainListView);
         searchView = findViewById(R.id.search_view);
         reloadBtn = findViewById(R.id.reload_btn);
-//        loading = findViewById(R.id.loadingLayout);
+        loading = findViewById(R.id.loadingLayout);
+        loading.setVisibility(View.VISIBLE);
 
         //local database define
         openHelper = new DatabaseHelper(this);
@@ -90,89 +92,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         EDb = ElementopenHelper.getWritableDatabase();
         ODb = ElementOptionopenHelper.getWritableDatabase();
 
-//        loading.setVisibility(View.VISIBLE);
-        init();
+        Cursor cursor = Db.rawQuery("SELECT *FROM " + FormDatabaeHelper.FORMTABLE_NAME,  null);
+        if (cursor.moveToFirst()) // data?
+            checksum = cursor.getString(cursor.getColumnIndex("Fchecksum"));
+        cursor.close();
 
+
+        init();
 
         reloadBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final Cursor fcursor = Db.rawQuery("SELECT *FROM " + FormDatabaeHelper.FORMTABLE_NAME,  null);
-                loading.setVisibility(View.VISIBLE);
-                //Connect the Api
-                String url = Common.getInstance().getMainItemUrl();
-                StringRequest postRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        JSONObject jsonObject = null;
-                        try {
-                            jsonObject = new JSONObject(response);
-                            result = jsonObject.getString("success");
-                            if (result.equals("true")){
-                                ApiList = jsonObject.getJSONArray("forms");
-                                String Apichecksum = jsonObject.getString("checksum");
-
-                                if(checksum != Apichecksum){
-                                    Db.execSQL("delete from "+ FormDatabaeHelper.FORMTABLE_NAME);
-                                    EDb.execSQL("delete from "+ ElementDatabaseHelper.ElEMENTTABLE_NAME);
-                                    ODb.execSQL("delete from "+ ElementOptionDatabaseHelper.OPTIONTABLE_NAME);
-                                    for(int i = 0; i < ApiList.length(); i++){
-                                        insertData(ApiList.getJSONObject(i).getString("form_name")
-                                                ,ApiList.getJSONObject(i).getString("form_id")
-                                                ,Apichecksum
-                                                ,ApiList.getJSONObject(i).getString("form_description"));
-                                    }
-                                    elementSave();
-                                    elementOptionSave();
-                                    update();
-                                    loading.setVisibility(View.GONE);
-                                }else {
-                                    update();
-                                    loading.setVisibility(View.GONE);
-                                }
-                            } else {
-                                update();
-                                loading.setVisibility(View.GONE);
-                                sideMenu_mangement();
-                                Toast.makeText(MainActivity.this, "Oops, can't login! please try to login again.", Toast.LENGTH_LONG).show();
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        update();
-                        loading.setVisibility(View.GONE);
-                        System.out.println(error);
-                        Toast.makeText(MainActivity.this, "It is currently offline.", Toast.LENGTH_LONG).show();
-                    }
-                }){
-                };
-                queue = Volley.newRequestQueue(MainActivity.this);
-                queue.add(postRequest);
+                Intent intent = new Intent(MainActivity.this, MainActivity.class);
+                startActivity(intent);
             }
         });
 
         sideMenu_mangement();
     }
 
-    private void update(){
-        if (listView!= null) {
-            listView.invalidateViews();
-        }
-        myAdapter.notifyDataSetChanged();
-
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent,
-                                    View v, int position, long id){
-                Intent intent = new Intent(MainActivity.this, FormActivity.class);
-                intent.putExtra("id", listFormId.get(position));
-                startActivity(intent);
-            }
-        });
-    }
 
     private void elementSave() throws JSONException {
         for (int i = 0; i < ApiList.length(); i ++){
@@ -195,12 +133,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                         ,ElemnetList.getJSONObject(j).getString("element_position")
                                         ,ElemnetList.getJSONObject(j).getString("element_page_number")
                                         ,ElemnetList.getJSONObject(j).getString("element_default_value")
-                                        ,ElemnetList.getJSONObject(j).getString("element_submit_secondary_text")
+                                        ,ElemnetList.getJSONObject(j).getString("element_constraint")
+                                        ,ElemnetList.getJSONObject(j).getString("element_address_hideline2")
                                         ,formId);
                             }
 
                         } else {
-//                            loading.setVisibility(View.GONE);
                             Toast.makeText(MainActivity.this, "Oops, Request failed..", Toast.LENGTH_LONG).show();
                         }
                     } catch (JSONException e) {
@@ -211,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 @Override
                 public void onErrorResponse(VolleyError error) {
 //                    loading.setVisibility(View.GONE);
-                    ListviewManagement();
+
 //                    sideMenu_mangement();
                     System.out.println(error);
                     Toast.makeText(MainActivity.this, "It is currently offline.", Toast.LENGTH_LONG).show();
@@ -254,7 +192,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 @Override
                 public void onErrorResponse(VolleyError error) {
 //                    loading.setVisibility(View.GONE);
-                    ListviewManagement();
+//                    ListviewManagement();
 //                    sideMenu_mangement();
                     System.out.println(error);
                     Toast.makeText(MainActivity.this, "It is currently offline.", Toast.LENGTH_LONG).show();
@@ -266,8 +204,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void init() {
-        loading = findViewById(R.id.loadingLayout);
-        loading.setVisibility(View.VISIBLE);
+
         //Connect the Api
         String url = Common.getInstance().getMainItemUrl();
         StringRequest postRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
@@ -294,14 +231,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             elementSave();
                             elementOptionSave();
                             ListviewManagement();
-                            loading.setVisibility(View.GONE);
+                            final Handler handler = new Handler();
+                            handler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    loading.setVisibility(View.GONE);
+                                }
+                            }, 1000);
                         }else {
                             ListviewManagement();
-                            loading.setVisibility(View.GONE);
+                            final Handler handler = new Handler();
+                            handler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    loading.setVisibility(View.GONE);
+                                }
+                            }, 1000);
                         }
                     } else {
                         ListviewManagement();
-                        loading.setVisibility(View.GONE);
+                        final Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                loading.setVisibility(View.GONE);
+                            }
+                        }, 50);
                         Toast.makeText(MainActivity.this, "Oops, can't login! please try to login again.", Toast.LENGTH_LONG).show();
                     }
                 } catch (JSONException e) {
@@ -450,7 +405,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Db.insert(FormDatabaeHelper.FORMTABLE_NAME,null,contentValues);
     }
 
-    public void insertElementData(String element_id,String element_title, String element_guidelines, String element_type, String element_position, String element_page_number, String element_default_value, String element_submit_secondary_text, String formid){
+    public void insertElementData(String element_id,String element_title, String element_guidelines, String element_type, String element_position, String element_page_number, String element_default_value, String element_constraint, String element_address_hideline2, String formid){
         ContentValues contentValues = new ContentValues();
         contentValues.put(ElementDatabaseHelper.ECOL_2, element_id);
         contentValues.put(ElementDatabaseHelper.ECOL_3, element_title);
@@ -459,8 +414,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         contentValues.put(ElementDatabaseHelper.ECOL_6, element_position);
         contentValues.put(ElementDatabaseHelper.ECOL_7, element_page_number);
         contentValues.put(ElementDatabaseHelper.ECOL_8, element_default_value);
-        contentValues.put(ElementDatabaseHelper.ECOL_9, element_submit_secondary_text);
-        contentValues.put(ElementDatabaseHelper.ECOL_10, formid);
+        contentValues.put(ElementDatabaseHelper.ECOL_9, element_constraint);
+        contentValues.put(ElementDatabaseHelper.ECOL_10, element_address_hideline2);
+        contentValues.put(ElementDatabaseHelper.ECOL_11, formid);
         EDb.insert(ElementDatabaseHelper.ElEMENTTABLE_NAME,null,contentValues);
     }
 

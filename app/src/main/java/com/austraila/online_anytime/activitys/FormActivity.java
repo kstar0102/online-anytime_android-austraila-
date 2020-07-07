@@ -21,7 +21,6 @@ import android.text.InputType;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -76,6 +75,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        TextView next_btn;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_formtest);
         getSupportActionBar().hide();
@@ -87,6 +87,8 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
 
         customScrollview = (CustomScrollview) findViewById(R.id.scrollmain);
         customScrollview.setEnableScrolling(true);
+
+        next_btn = findViewById(R.id.next_textBtn);
 
         linearLayout = findViewById(R.id.linear_layout);
         linearLayout.setOrientation(LinearLayout.VERTICAL);
@@ -105,8 +107,9 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         backTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(FormActivity.this, MainActivity.class);
-                startActivity(intent);
+//                Intent intent = new Intent(FormActivity.this, MainActivity.class);
+//                startActivity(intent);
+                onBackPressed();
             }
         });
         //get title and des form main activity
@@ -115,7 +118,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         formtitle = getIntent().getStringExtra("title");
 
         ArrayList<String> groupkeyList = new ArrayList<String>();
-        cursor = db.rawQuery("SELECT *FROM " + ElementDatabaseHelper.ElEMENTTABLE_NAME + " WHERE " + ElementDatabaseHelper.ECOL_10 + "=?", new String[]{formid});
+        cursor = db.rawQuery("SELECT *FROM " + ElementDatabaseHelper.ElEMENTTABLE_NAME + " WHERE " + ElementDatabaseHelper.ECOL_11 + "=?", new String[]{formid});
         if (cursor.moveToFirst()){
             do{
                 String keydate = cursor.getString(cursor.getColumnIndex("element_page_number"));
@@ -147,7 +150,8 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void showElement(int i) {
 
-        cursor = db.rawQuery("SELECT *FROM " + ElementDatabaseHelper.ElEMENTTABLE_NAME + " WHERE " + ElementDatabaseHelper.ECOL_10 + "=? AND " + ElementDatabaseHelper.ECOL_7 + "=?", new String[]{formid, String.valueOf(i)});
+
+        cursor = db.rawQuery("SELECT *FROM " + ElementDatabaseHelper.ElEMENTTABLE_NAME + " WHERE " + ElementDatabaseHelper.ECOL_11 + "=? AND " + ElementDatabaseHelper.ECOL_7 + "=?", new String[]{formid, String.valueOf(i)});
         System.out.println(cursor.getCount());
         if (cursor.moveToFirst()){
             do{
@@ -190,7 +194,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
                         DropDown(cursor.getString(cursor.getColumnIndex("element_title")));
                         break;
                     case "checkbox":
-                        CheckBoxes(cursor.getString(cursor.getColumnIndex("element_title")));
+                        CheckBoxes(cursor.getString(cursor.getColumnIndex("element_title")), cursor.getString(cursor.getColumnIndex("element_id")));
                         break;
                     case "radio":
                         MultipleChoice(cursor.getString(cursor.getColumnIndex("element_title")), cursor.getString(cursor.getColumnIndex("element_id")));
@@ -207,6 +211,9 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
                     case "page_break":
                         page_break(i);
                         break;
+                    case "address":
+                        AddressLint(cursor.getString(cursor.getColumnIndex("element_title")), cursor.getInt(cursor.getColumnIndex("element_address_hideline2")));
+                        break;
                     case "section":
                         SectionBreak(cursor.getString(cursor.getColumnIndex("element_title")), cursor.getString(cursor.getColumnIndex("element_guidelines")));
                 }
@@ -217,6 +224,161 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         if(i == Integer.parseInt(max)){
             submitButton();
         }
+    }
+
+    private void AddressLint(String title, int address) {
+        TextView addressTitle = new TextView(this);
+        titleTextview(addressTitle);
+        addressTitle.setText(title);
+        linearLayout.addView(addressTitle);
+
+        LinearLayout.LayoutParams streetaddressparams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        streetaddressparams.setMargins(50,30,50,5);
+        EditText streetEdit = new EditText(this);
+        EditTextview(streetEdit);
+
+        TextView streettitle = new TextView(this);
+        titleTextview(streettitle);
+        streettitle.setTextSize(getResources().getDimension(R.dimen.textsize_normal));
+        streettitle.setText("Street Address");
+
+        LinearLayout stressaddress = new LinearLayout(this);
+        stressaddress.setOrientation(LinearLayout.VERTICAL);
+        stressaddress.addView(streetEdit);
+        stressaddress.addView(streettitle);
+
+        LinearLayout line2 = new LinearLayout(this);
+        line2.setOrientation(LinearLayout.VERTICAL);
+
+        EditText lineEdit = new EditText(this);
+        EditTextview(lineEdit);
+
+        TextView lineText = new TextView(this);
+        titleTextview(lineText);
+        lineText.setTextSize(getResources().getDimension(R.dimen.textsize_normal));
+        lineText.setText("Address Line2");
+
+        line2.addView(lineEdit);
+        line2.addView(lineText);
+
+        if(address == 1){
+            linearLayout.addView(stressaddress);
+        }else {
+            linearLayout.addView(stressaddress);
+            linearLayout.addView(line2);
+        }
+
+        LinearLayout.LayoutParams CityStateparams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        CityStateparams.setMargins(0,15,10,5);
+        LinearLayout CityState = new LinearLayout(this);
+        CityState.setOrientation(LinearLayout.HORIZONTAL);
+        CityState.setLayoutParams(CityStateparams);
+
+        LinearLayout addresscity = new LinearLayout(this);
+        LinearLayout addressstate = new LinearLayout(this);
+        addressstate.setWeightSum(1);
+        addresscity.setWeightSum(1);
+
+        CityState.addView(addresscity);
+        CityState.addView(addressstate);
+
+        addresscity.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout.LayoutParams cityparams = new LinearLayout.LayoutParams(
+                530,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        cityparams.setMargins(0,0,10,0);
+        addresscity.setLayoutParams(cityparams);
+
+
+        EditText cityEdit = new EditText(this);
+        EditTextview(cityEdit);
+
+        TextView cityText = new TextView(this);
+        titleTextview(cityText);
+        cityText.setTextSize(getResources().getDimension(R.dimen.textsize_normal));
+        cityText.setText("City");
+//
+//
+        addressstate.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout.LayoutParams stateparma = new LinearLayout.LayoutParams(
+                530,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        stateparma.setMargins(0,0,10,0);
+        addressstate.setLayoutParams(stateparma);
+
+        EditText stateEdit = new EditText(this);
+        EditTextview(stateEdit);
+
+        TextView stateText = new TextView(this);
+        titleTextview(stateText);
+        stateText.setTextSize(getResources().getDimension(R.dimen.textsize_normal));
+        stateText.setText("State/Province/Region");
+
+        addresscity.addView(cityEdit);
+        addresscity.addView(cityText);
+        addressstate.addView(stateEdit);
+        addressstate.addView(stateText);
+
+        linearLayout.addView(CityState);
+
+        LinearLayout postalCountry = new LinearLayout(this);
+        postalCountry.setOrientation(LinearLayout.HORIZONTAL);
+        postalCountry.setLayoutParams(CityStateparams);
+
+        LinearLayout postal = new LinearLayout(this);
+        postal.setOrientation(LinearLayout.VERTICAL);
+        postal.setWeightSum(1);
+        postal.setLayoutParams(cityparams);
+        LinearLayout country = new LinearLayout(this);
+        country.setOrientation(LinearLayout.VERTICAL);
+        country.setWeightSum(1);
+        country.setLayoutParams(stateparma);
+
+        postalCountry.addView(postal);
+        postalCountry.addView(country);
+
+        EditText postalEdit = new EditText(this);
+        TextView postalText = new TextView(this);
+        EditTextview(postalEdit);
+        titleTextview(postalText);
+        postalText.setTextSize(getResources().getDimension(R.dimen.textsize_normal));
+        postalText.setText("Postal/Zip Code");
+
+        postal.addView(postalEdit);
+        postal.addView(postalText);
+
+
+        String[] countryArray = {"qwe","zcxv","sdf","fdgh"};
+        LinearLayout.LayoutParams dropdownParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        Spinner countrydrop = new Spinner(this);
+        dropdownParams.setMargins(50,0,50,0);
+        countrydrop.setLayoutParams(dropdownParams);
+        countrydrop.setBackground(getResources().getDrawable(R.drawable.editview_border));
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.spinner_dropdown_item, countryArray);
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        countrydrop.setAdapter(adapter);
+        countrydrop.setOnItemSelectedListener(this);
+
+        TextView countryText = new TextView(this);
+        titleTextview(countryText);
+        countryText.setText("Country");
+        countryText.setTextSize(getResources().getDimension(R.dimen.textsize_normal));
+        country.addView(countrydrop);
+        country.addView(countryText);
+
+        linearLayout.addView(postalCountry);
     }
 
     private void submitButton() {
@@ -241,7 +403,6 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
     private void setTextTitle() {
         TextView TitleTextvew = new TextView(this);
         TextView desTextview = new TextView(this);
-        TitleTextvew.setText(Html.fromHtml(formtitle));
 
         titleTextview(TitleTextvew);
         TitleTextvew.setTextSize(getResources().getDimension(R.dimen.textsize_title));
@@ -253,12 +414,15 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         );
         breakdesparams.setMargins(50,0,50,0);
         titleTextview(desTextview);
-        desTextview.setText(Html.fromHtml(formDes));
+
         desTextview.setLayoutParams(breakdesparams);
         desTextview.setTextSize(getResources().getDimension(R.dimen.textsize_normal));
 
         linearLayout.addView(TitleTextvew);
         linearLayout.addView(desTextview);
+
+        TitleTextvew.setText(Html.fromHtml(formtitle));
+        desTextview.setText(Html.fromHtml(formDes));
     }
 
     private void WebSiteLint(String title) {
@@ -638,22 +802,35 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         linearLayout.addView(dropdown);
     }
 
-    private void CheckBoxes(String title) {
+    private void CheckBoxes(String title, String id) {
+        ArrayList<String> mylist = new ArrayList<String>();
+
+        Cursor cursor = ODb.rawQuery("SELECT *FROM " + ElementOptionDatabaseHelper.OPTIONTABLE_NAME + " WHERE " + ElementOptionDatabaseHelper.OCOL_2 + "=? AND " + ElementOptionDatabaseHelper.OCOL_3 + "=?" , new String[]{formid, id});
+
+        if(cursor.moveToFirst()){
+            do{
+                String data = cursor.getString(cursor.getColumnIndex("OOption"));
+                mylist.add(data);
+                System.out.println(data);
+            }while (cursor.moveToNext());
+
+        }
+        cursor.close();
+
         //define the checkboxesTitle
         TextView checkboxesTitle = new TextView(this);
         titleTextview(checkboxesTitle);
         checkboxesTitle.setText(Html.fromHtml(title));
         linearLayout.addView(checkboxesTitle);
 
-        String[] ab ={"CheckBox1","CheckBox2"};
         LinearLayout.LayoutParams ParmsDescription = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
         ParmsDescription.setMargins(50,10,50,0);
-        for(int i = 0; i < ab.length; i ++){
+        for(int i = 0; i < mylist.size(); i ++){
             CheckBox checkBox = new CheckBox(this);
-            checkBox.setText(ab[i]);
+            checkBox.setText(mylist.get(i));
             checkBox.setTextColor(getResources().getColor(R.color.colorPrimaryDark));
             checkBox.setTextSize(getResources().getDimension(R.dimen.textsize_normal));
             checkBox.setLayoutParams(ParmsDescription);
@@ -836,6 +1013,13 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         if(showcheckbtn < 2 ){
             prebutton.setVisibility(View.GONE);
         }
+
+//        if(showcheckbtn < Integer.parseInt(max)){
+//            TextView next_btn = findViewById(R.id.next_textBtn);
+//            next_btn.setText("Next");
+//        }else {
+//            next
+//        }
         nextbutton.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
@@ -1065,7 +1249,6 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         editparams.setMargins(50, 0, 50, 5);
         editText.setLayoutParams(editparams);
     }
-
 
 }
 

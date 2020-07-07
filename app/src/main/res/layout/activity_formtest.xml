@@ -31,6 +31,7 @@
             android:textColor="@color/white_color"/>
 
         <TextView
+            android:id="@+id/next_textBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
@@ -44,15 +45,14 @@
 
     <com.austraila.online_anytime.Common.CustomScrollview
         android:id="@+id/scrollmain"
-
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
         <LinearLayout
             android:id="@+id/linear_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
-
 
         </LinearLayout>
 
