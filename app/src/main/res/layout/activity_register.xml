@@ -59,6 +59,19 @@
             android:hint="@string/pass_hint"
             android:layout_gravity="center"/>
 
+        <EditText
+            android:id="@+id/register_confirm"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginTop="20dp"
+            android:padding="5dp"
+            android:background="@drawable/editview_border"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:inputType="textPassword"
+            android:hint="Confirm"
+            android:layout_gravity="center"/>
+
         <Button
             android:id="@+id/register_btn"
             android:layout_width="match_parent"

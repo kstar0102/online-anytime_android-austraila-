@@ -7,6 +7,7 @@ public class Common {
     private String mainItemUrl = "forms";
     private String formelementUrl = "http://192.168.107.90:89/form_elements/";
     private String elemnetOptionUrl = "http://192.168.107.90:89/form_elements_options";
+    private String registerUrl = "register";
 
 //    private String TestloginUrl = "http://online-anytime.com.au/olat/newapi/login";
 //    private String TestbaseUrl = "http://online-anytime.com.au/olat/newapi/";
@@ -37,6 +38,10 @@ public class Common {
 
     public String getElemnetOptionUrl() {
         return elemnetOptionUrl;
+    }
+
+    public String getRegisterUrl(){
+        return TestbaseUrl + registerUrl + ApiKey;
     }
 
     public String[] countryArray ={
