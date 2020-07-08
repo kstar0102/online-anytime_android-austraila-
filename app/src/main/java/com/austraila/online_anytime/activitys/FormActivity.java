@@ -53,6 +53,8 @@ import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.austraila.online_anytime.activitys.cameraActivity.CameraActivity.Image_Capture_Code;
 
@@ -62,16 +64,24 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
     LinearLayout buttonsLayout;
     DatePickerDialog picker;
     SignatureView signatureView;
+    ImageView imageView;
     Bitmap photo;
     CustomScrollview customScrollview;
-    Cursor cursor, optionCursor;
+    Cursor cursor;
     String formid, formDes, formtitle;
+    static String elementCameraId;
     private SQLiteDatabase db,ODb;
+    static int ss = 0;
     private SQLiteOpenHelper openHelper,ElementOptionopenHelper;
     ArrayList<String> data = new ArrayList<String>();
     public int checkpage = 1;
-    String max;
+    String max,imageId;
     TextView next_btn;
+
+    Map<String, String> element_data = new HashMap<String, String>();
+
+    static Map<String, Bitmap> elementPhotos = new HashMap<String, Bitmap>();
+
 
     @SuppressLint("ResourceType")
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -80,7 +90,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_formtest);
         getSupportActionBar().hide();
-
+        System.out.println(elementCameraId);
         openHelper = new ElementDatabaseHelper(this);
         ElementOptionopenHelper = new ElementOptionDatabaseHelper(this);
         db = openHelper.getReadableDatabase();
@@ -98,7 +108,12 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         String camera = intent.getStringExtra("camera");
         formid = getIntent().getStringExtra("id");
         Bitmap bitmap = (Bitmap) intent.getParcelableExtra("photoImage");
-        photo = bitmap;
+//        photo = bitmap;
+        if (elementCameraId != null){
+            elementPhotos.put(elementCameraId, bitmap);
+        }
+        System.out.println(photo);
+
         if(camera != null){
             Intent cInt = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             startActivityForResult(cInt,Image_Capture_Code);
@@ -115,6 +130,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         formid = getIntent().getStringExtra("id");
         formDes = getIntent().getStringExtra("des");
         formtitle = getIntent().getStringExtra("title");
+        imageId = getIntent().getStringExtra("elementId");
 
         ArrayList<String> groupkeyList = new ArrayList<String>();
         cursor = db.rawQuery("SELECT *FROM " + ElementDatabaseHelper.ElEMENTTABLE_NAME + " WHERE " + ElementDatabaseHelper.ECOL_11 + "=?", new String[]{formid});
@@ -140,6 +156,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
 
         //show the element.
         showElement(checkpage);
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -149,43 +166,43 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         setTextTitle();
 
         cursor = db.rawQuery("SELECT *FROM " + ElementDatabaseHelper.ElEMENTTABLE_NAME + " WHERE " + ElementDatabaseHelper.ECOL_11 + "=? AND " + ElementDatabaseHelper.ECOL_7 + "=?", new String[]{formid, String.valueOf(i)});
-        System.out.println(cursor.getCount());
+
         if (cursor.moveToFirst()){
             do{
                 data.add(cursor.getString(cursor.getColumnIndex("element_type")));
                 switch (cursor.getString(cursor.getColumnIndex("element_type"))){
                     case "number":
-                        NumberLint(cursor.getString(cursor.getColumnIndex("element_title")));
+                        NumberLint(cursor.getString(cursor.getColumnIndex("element_title")),cursor.getString(cursor.getColumnIndex("element_id")));
                         break;
                     case "europe_date":
-                        DateLint(cursor.getString(cursor.getColumnIndex("element_title")));
+                        DateLint(cursor.getString(cursor.getColumnIndex("element_title")),cursor.getString(cursor.getColumnIndex("element_id")));
                         break;
                     case "file":
-                        fileUpload(cursor.getString(cursor.getColumnIndex("element_title")));
+                        fileUpload(cursor.getString(cursor.getColumnIndex("element_title")),cursor.getString(cursor.getColumnIndex("element_id")));
                         break;
                     case "email":
-                        SingleLineTest(cursor.getString(cursor.getColumnIndex("element_title")));
+                        SingleLineTest(cursor.getString(cursor.getColumnIndex("element_title")),cursor.getString(cursor.getColumnIndex("element_id")));
                         break;
                     case "money":
-                        PriceLint(cursor.getString(cursor.getColumnIndex("element_title")));
+                        PriceLint(cursor.getString(cursor.getColumnIndex("element_title")),cursor.getString(cursor.getColumnIndex("element_id")));
                         break;
                     case "text":
-                        SingleLineTest(cursor.getString(cursor.getColumnIndex("element_title")));
+                        SingleLineTest(cursor.getString(cursor.getColumnIndex("element_title")),cursor.getString(cursor.getColumnIndex("element_id")));
                         break;
                     case "signature":
-                        SignatureMainLayout(cursor.getString(cursor.getColumnIndex("element_title")));
+                        SignatureMainLayout(cursor.getString(cursor.getColumnIndex("element_title")),cursor.getString(cursor.getColumnIndex("element_id")));
                         break;
                     case "simple_name":
-                        NameLint(cursor.getString(cursor.getColumnIndex("element_title")));
+                        NameLint(cursor.getString(cursor.getColumnIndex("element_title")),cursor.getString(cursor.getColumnIndex("element_id")));
                         break;
                     case "media":
-                        MediaLint(cursor.getString(cursor.getColumnIndex("element_title")));
+                        MediaLint(cursor.getString(cursor.getColumnIndex("element_title")),cursor.getString(cursor.getColumnIndex("element_id")));
                         break;
                     case "phone":
-                        PhoneLint(cursor.getString(cursor.getColumnIndex("element_title")));
+                        PhoneLint(cursor.getString(cursor.getColumnIndex("element_title")),cursor.getString(cursor.getColumnIndex("element_id")));
                         break;
                     case "date":
-                        DateLint(cursor.getString(cursor.getColumnIndex("element_title")));
+                        DateLint(cursor.getString(cursor.getColumnIndex("element_title")),cursor.getString(cursor.getColumnIndex("element_id")));
                         break;
                     case "select":
                         DropDown(cursor.getString(cursor.getColumnIndex("element_title")), cursor.getString(cursor.getColumnIndex("element_id")));
@@ -197,19 +214,19 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
                         MultipleChoice(cursor.getString(cursor.getColumnIndex("element_title")), cursor.getString(cursor.getColumnIndex("element_id")));
                         break;
                     case "time":
-                        TimeLint(cursor.getString(cursor.getColumnIndex("element_title")));
+                        TimeLint(cursor.getString(cursor.getColumnIndex("element_title")),cursor.getString(cursor.getColumnIndex("element_id")));
                         break;
                     case "url":
-                        WebSiteLint(cursor.getString(cursor.getColumnIndex("element_title")));
+                        WebSiteLint(cursor.getString(cursor.getColumnIndex("element_title")),cursor.getString(cursor.getColumnIndex("element_id")));
                         break;
                     case "textarea":
-                        ParagraphText(cursor.getString(cursor.getColumnIndex("element_title")));
+                        ParagraphText(cursor.getString(cursor.getColumnIndex("element_title")),cursor.getString(cursor.getColumnIndex("element_id")));
                         break;
                     case "page_break":
-                        page_break(i);
+                        page_break(i,cursor.getString(cursor.getColumnIndex("element_id")));
                         break;
                     case "address":
-                        AddressLint(cursor.getString(cursor.getColumnIndex("element_title")), cursor.getInt(cursor.getColumnIndex("element_address_hideline2")));
+                        AddressLint(cursor.getString(cursor.getColumnIndex("element_title")), cursor.getInt(cursor.getColumnIndex("element_address_hideline2")),cursor.getString(cursor.getColumnIndex("element_id")));
                         break;
                     case "matrix":
                         matrixLint(cursor.getString(cursor.getColumnIndex("element_title")), cursor.getString(cursor.getColumnIndex("element_guidelines")), cursor.getString(cursor.getColumnIndex("element_id")));
@@ -220,7 +237,6 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
             }while(cursor.moveToNext());
         }
         cursor.close();
-        System.out.println(data);
 
         if(i == Integer.parseInt(max)){
             submitButton();
@@ -338,7 +354,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         linearLayout.addView(matrixLayout);
     }
 
-    private void AddressLint(String title, int address) {
+    private void AddressLint(String title, int address, String id) {
         TextView addressTitle = new TextView(this);
         titleTextview(addressTitle);
         addressTitle.setText(title);
@@ -537,7 +553,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         desTextview.setText(Html.fromHtml(formDes));
     }
 
-    private void WebSiteLint(String title) {
+    private void WebSiteLint(String title, String id) {
         //define the element
         TextView webSiteTitle = new TextView(this);
         EditText websiteEdit = new EditText(this);
@@ -553,7 +569,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         linearLayout.addView(websiteEdit);
     }
 
-    private void SignatureMainLayout(String title) {
+    private void SignatureMainLayout(String title, String id) {
         //set signature title
         TextView signTitle = new TextView(this);
         titleTextview(signTitle);
@@ -680,9 +696,8 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         }
     }
 
-    // camera funtion
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == Image_Capture_Code) {
             if (resultCode == RESULT_OK) {
@@ -694,14 +709,15 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
                 intent.putExtra("title", formtitle);
                 startActivity(intent);
             } else if (resultCode == RESULT_CANCELED) {
-                Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
+                Toast.makeText(FormActivity.this, "Cancelled", Toast.LENGTH_LONG).show();
             }
         }
     }
 
     // file exploer funtion
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private void fileUpload(String title) {
+    private void fileUpload(String title, final String id) {
+
         TextView filetitle = new TextView(this);
         titleTextview(filetitle);
         filetitle.setText(Html.fromHtml(title));
@@ -719,19 +735,6 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         linearLayout.addView(filetitle);
         linearLayout.addView(uploadbtn);
 
-        uploadbtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Bundle bundle = new Bundle();
-                bundle.putString("id", formid);
-                bundle.putString("formDes", formDes);
-                bundle.putString("formtitle", formtitle);
-                AddPhotoBottomDialogFragment addPhotoBottomDialogFragment = AddPhotoBottomDialogFragment.newInstance();
-                addPhotoBottomDialogFragment.setArguments(bundle);
-                addPhotoBottomDialogFragment.show(getSupportFragmentManager(),"add_photo_dialog_fragment");
-            }
-        });
-
         //define the Imageview
         ImageView photoImage = new ImageView(this);
         LinearLayout.LayoutParams photoImageParam = new LinearLayout.LayoutParams(
@@ -740,32 +743,63 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         );
         photoImageParam.setMargins(50,10,50,5);
         photoImage.setMinimumHeight(600);
-        photoImage.setVisibility(View.GONE);
         photoImage.setLayoutParams(photoImageParam);
+        photoImage.setTag(id);
 
         TextView photofilepath = new TextView(this);
         titleTextview(photofilepath);
         photofilepath.setTextSize(getResources().getDimension(R.dimen.textsize_normal));
         photofilepath.setVisibility(View.GONE);
+
+        linearLayout.addView(photoImage);
+        linearLayout.addView(photofilepath);
+
+        photo = elementPhotos.get(id);
+        if(photo != null){
+            photoImage.setImageBitmap(photo);
+        }
+        uploadbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Bundle bundle = new Bundle();
+                bundle.putString("id", formid);
+                bundle.putString("formDes", formDes);
+                bundle.putString("formtitle", formtitle);
+                FormActivity.elementCameraId = id;
+                AddPhotoBottomDialogFragment addPhotoBottomDialogFragment = AddPhotoBottomDialogFragment.newInstance();
+                addPhotoBottomDialogFragment.setArguments(bundle);
+                addPhotoBottomDialogFragment.show(getSupportFragmentManager(),"add_photo_dialog_fragment");
+            }
+        });
+
         Intent intent = getIntent();
         String getfile = intent.getStringExtra("filepath");
 
         if(getfile != null){
             photofilepath.setVisibility(View.VISIBLE);
             File file = new File(getfile);
-            Log.e("adfasdfasdf", getfile );
             Bitmap myBitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
             photofilepath.setText(getfile);
         }
-        if(photo != null){
-            photoImage.setVisibility(View.VISIBLE);
-            photoImage.setImageBitmap(photo);
-        }
 
-        linearLayout.addView(photoImage);
-        linearLayout.addView(photofilepath);
-
+//        if(photo != null){
+//            System.out.println("aaaaa");
+//            showImage(elementCameraId);
+//        }
     }
+
+
+    private void showImage(String id) {
+        System.out.println(id);
+        if(photo != null){
+            System.out.println("get all photo");
+            imageView = linearLayout.findViewWithTag(id);
+            imageView.setImageBitmap(photo);
+        }
+    }
+    
+
+
 
     //spinner select function
     @Override
@@ -779,7 +813,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    private void DateLint(String title) {
+    private void DateLint(String title, String id) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date date = new Date();
         String dateTime = dateFormat.format(date);
@@ -815,7 +849,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         linearLayout.addView(dateEditText);
     }
 
-    private void PhoneLint(String title) {
+    private void PhoneLint(String title, String id) {
         //define the phone title
         TextView phoneTitle = new TextView(this);
         titleTextview(phoneTitle);
@@ -898,7 +932,6 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
             do{
                 String data = cursor.getString(cursor.getColumnIndex("OOption"));
                 dropList.add(data);
-                System.out.println(data);
             }while (cursor.moveToNext());
 
         }
@@ -936,7 +969,6 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
             do{
                 String data = cursor.getString(cursor.getColumnIndex("OOption"));
                 mylist.add(data);
-                System.out.println(data);
             }while (cursor.moveToNext());
 
         }
@@ -970,7 +1002,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         }
     }
 
-    private void NumberLint(String title) {
+    private void NumberLint(String title, String id) {
         //define the element
         TextView numberTitle = new TextView(this);
         EditText numberEdit = new EditText(this);
@@ -983,11 +1015,12 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         //set property the numberEdit
         EditTextview(numberEdit);
         numberEdit.setHint("Only number");
+        numberEdit.setId(Integer.parseInt(id));
         numberEdit.setInputType(InputType.TYPE_CLASS_NUMBER);
         linearLayout.addView(numberEdit);
     }
 
-    private void MediaLint(String title) {
+    private void MediaLint(String title, String id) {
         //define the element
         TextView mediaTitle = new TextView(this);
         ImageView mediaImage = new ImageView(this);
@@ -1034,7 +1067,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         linearLayout.addView(breakdes);
     }
 
-    private void PriceLint(String title) {
+    private void PriceLint(String title, String id) {
         //define elements
         TextView priceTitle = new TextView(this);
         TextView label1 = new TextView(this);
@@ -1109,7 +1142,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         linearLayout.addView(priceLinerlayout);
     }
 
-    private void page_break(final int showcheckbtn){
+    private void page_break(final int showcheckbtn, final String id){
         LinearLayout btnlinearLayout =new LinearLayout(this);
         LinearLayout.LayoutParams btnLinerParam = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -1168,7 +1201,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         linearLayout.addView(btnlinearLayout);
     }
 
-    private void TimeLint(String title) {
+    private void TimeLint(String title, String id) {
         //define the timepicker and timetitle
         TimePicker timePicker = new TimePicker(this);
         TextView timeTitle = new TextView(this);
@@ -1220,7 +1253,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         linearLayout.addView(editText);
     }
 
-    public void SingleLineTest (String title){
+    public void SingleLineTest (String title, String id){
         // define the textview and Edittext
         TextView textView =  new TextView(this);
         EditText editText = new EditText(this);
@@ -1237,7 +1270,8 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         linearLayout.addView(editText);
     }
 
-    private void ParagraphText(String title){
+    private void ParagraphText(String title, String id){
+
         // define the text title and edittext(muitline)
         TextView paragraphTitle =  new TextView(this);
         EditText textArea = new EditText(this);
@@ -1297,7 +1331,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         linearLayout.addView(radioGroup);
     }
 
-    private void  NameLint(String title) {
+    private void  NameLint(String title, String id) {
         // define the name title and frist, last edittext
         TextView nametitle = new TextView(this);
         EditText firstname = new EditText(this);
