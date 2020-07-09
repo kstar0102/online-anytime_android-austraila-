@@ -17,9 +17,10 @@ public class Common {
 //    private String TestbaseUrl = "http://online-anytime.com.au/olat/newapi/";
 //    private String mainItemUrl = "forms";
 //    private String formelementUrl = "http://online-anytime.com.au/olat/newapi/form_elements/";
-//    private String elemnetOptionUrl = "http://online-anytime.com.au/olat/newapi/form_elements_options"
+//    private String elemnetOptionUrl = "http://online-anytime.com.au/olat/newapi/form_elements_options";
 //    private String forgetUrl = "http://online-anytime.com.au/olat/newapi/forget";
 //    private String codeUrl = "http://online-anytime.com.au/olat/newapi/forget/valid";
+//    private String setpassUrl = "http://online-anytime.com.au/olat/newapi/forget/setpassword";
 
 
     private static Common instance = new Common();

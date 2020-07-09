@@ -105,10 +105,10 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         String camera = intent.getStringExtra("camera");
         formid = getIntent().getStringExtra("id");
         Bitmap bitmap = (Bitmap) intent.getParcelableExtra("photoImage");
+
         if (elementCameraId != null){
             elementPhotos.put(elementCameraId, bitmap);
         }
-        System.out.println(photo);
 
         if(camera != null){
             Intent cInt = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -718,7 +718,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
 
         //define the button.
         Button uploadbtn = new Button(this);
-        LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(500,110);
+        LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(500, LinearLayout.LayoutParams.WRAP_CONTENT);
         btnParams.setMargins(50,25,50,10);
         uploadbtn.setLayoutParams(btnParams);
         uploadbtn.setBackground(getDrawable(R.drawable.btn_rounded));
@@ -736,12 +736,9 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
         photoImageParam.setMargins(50,10,50,5);
-        photoImage.setMinimumHeight(600);
+        photoImage.setMinimumHeight(500);
         photoImage.setLayoutParams(photoImageParam);
-        photoImage.setVisibility(View.GONE);
-        if(photoImage != null){
-            photoImage.setVisibility(View.VISIBLE);
-        }
+
         photoImage.setTag(id);
 
         TextView photofilepath = new TextView(this);
@@ -754,7 +751,6 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
 
         photo = elementPhotos.get(id);
         if(photo != null){
-            linearLayout.findViewWithTag(elementCameraId).setVisibility(View.VISIBLE);
             photoImage.setImageBitmap(photo);
         }
 
