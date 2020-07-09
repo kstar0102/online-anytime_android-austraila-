@@ -71,7 +71,6 @@ public class SettingActivity extends AppCompatActivity implements NavigationView
 
         final Cursor cursor = db.rawQuery("SELECT *FROM " + DatabaseHelper.TABLE_NAME,  null);
         if(cursor != null){
-            Log.e("TAGtotal", String.valueOf(cursor.getCount()));
             if (cursor.moveToFirst()){
                 do{
                     useremail = cursor.getString(cursor.getColumnIndex("Gmail"));

@@ -34,7 +34,7 @@ public class LoginActivity extends AppCompatActivity{
     private SQLiteOpenHelper openHelper;
     EditText email, pass;
     Button loginBtn;
-    String Email, Pass, userfullname, result, user_id;
+    String Email, Pass, userfullname, result, user_id, token;
     RequestQueue queue;
 
     @Override
@@ -72,8 +72,9 @@ public class LoginActivity extends AppCompatActivity{
                                         result = jsonObject.getString("success");
                                         userfullname = jsonObject.getString("user_fullname");
                                         user_id = jsonObject.getString("user_id");
+                                        token = jsonObject.getString("token");
                                         if (result.equals("true")){
-                                            insertData(Email, Pass, userfullname);
+                                            insertData(Email, Pass, userfullname, token);
                                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                                             startActivity(intent);
                                         } else {
@@ -112,11 +113,12 @@ public class LoginActivity extends AppCompatActivity{
         startActivity(intent);
     }
 
-    public void insertData(String fGmail,String fPassword, String fusername){
+    public void insertData(String fGmail,String fPassword, String fusername, String token){
         ContentValues contentValues = new ContentValues();
         contentValues.put(DatabaseHelper.COL_2,fGmail);
         contentValues.put(DatabaseHelper.COL_3,fPassword);
         contentValues.put(DatabaseHelper.COL_4, fusername);
+        contentValues.put(DatabaseHelper.COL_5, token);
         db.insert(DatabaseHelper.TABLE_NAME,null,contentValues);
     }
 }

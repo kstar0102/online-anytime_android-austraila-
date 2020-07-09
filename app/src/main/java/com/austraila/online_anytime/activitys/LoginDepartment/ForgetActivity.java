@@ -35,6 +35,7 @@ public class ForgetActivity extends AppCompatActivity {
                     return;
                 }
                 Intent intent = new Intent(ForgetActivity.this, CodeCheckActivity.class);
+                intent.putExtra("Email", forgetEmail.getText().toString());
                 startActivity(intent);
 //                AlertDialog alertDialog = new AlertDialog.Builder(ForgetActivity.this).create();
 //                alertDialog.setTitle("Notice");

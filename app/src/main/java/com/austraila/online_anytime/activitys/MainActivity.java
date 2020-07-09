@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,6 +24,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -45,7 +47,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, SearchView.OnQueryTextListener {
@@ -60,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     JSONArray ElemnetList = new JSONArray();
     JSONArray ElemnetOptionList = new JSONArray();
     SearchView searchView;
-    String useremail, result, checksum;
+    String useremail, result, checksum, token;
     CustomAdapter myAdapter;
     RequestQueue queue;
     ArrayList<String> listFormId = new ArrayList<String>();
@@ -97,6 +100,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             checksum = cursor.getString(cursor.getColumnIndex("Fchecksum"));
         cursor.close();
 
+        Cursor fcursor = db.rawQuery("SELECT *FROM " + DatabaseHelper.TABLE_NAME,  null);
+        if(fcursor != null){
+            if (fcursor.moveToFirst()){
+                do{
+                    token = fcursor.getString(fcursor.getColumnIndex("token"));
+                }while(fcursor.moveToNext());
+            }
+            fcursor.close();
+        }
 
         init();
 
@@ -115,7 +127,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void elementSave() throws JSONException {
         for (int i = 0; i < ApiList.length(); i ++){
             final String formId = ApiList.getJSONObject(i).getString("form_id");
-            StringRequest postRequest = new StringRequest(Request.Method.GET, Common.getInstance().getFormelementUrl() + formId + Common.getInstance().getApiKey(), new Response.Listener<String>() {
+            StringRequest postRequest = new StringRequest(Request.Method.GET, Common.getInstance().getFormelementUrl() + formId, new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
                     JSONObject jsonObject = null;
@@ -155,6 +167,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Toast.makeText(MainActivity.this, "It is currently offline.", Toast.LENGTH_LONG).show();
                 }
             }){
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    Map<String, String> headers = new HashMap<>();
+                    headers.put("token", token);
+                    return headers;
+                }
             };
             queue = Volley.newRequestQueue(MainActivity.this);
             queue.add(postRequest);
@@ -162,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void elementOptionSave() {
-            StringRequest postRequest = new StringRequest(Request.Method.GET, Common.getInstance().getElemnetOptionUrl() + Common.getInstance().getApiKey(), new Response.Listener<String>() {
+            StringRequest postRequest = new StringRequest(Request.Method.GET, Common.getInstance().getElemnetOptionUrl(), new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
                     JSONObject jsonObject = null;
@@ -198,6 +216,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Toast.makeText(MainActivity.this, "It is currently offline.", Toast.LENGTH_LONG).show();
                 }
             }){
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    Map<String, String> headers = new HashMap<>();
+                    headers.put("token", token);
+                    return headers;
+                }
             };
             queue = Volley.newRequestQueue(MainActivity.this);
             queue.add(postRequest);
@@ -272,6 +296,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Toast.makeText(MainActivity.this, "It is currently offline.", Toast.LENGTH_LONG).show();
             }
         }){
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("token", token);
+                return headers;
+            }
         };
         queue = Volley.newRequestQueue(MainActivity.this);
         queue.add(postRequest);

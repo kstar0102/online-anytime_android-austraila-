@@ -64,12 +64,11 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
     LinearLayout buttonsLayout;
     DatePickerDialog picker;
     SignatureView signatureView;
-    ImageView imageView;
     Bitmap photo;
     CustomScrollview customScrollview;
     Cursor cursor;
     String formid, formDes, formtitle;
-    static String elementCameraId;
+    static String elementCameraId, numberElementid, singleElementid, dateElementid;
     private SQLiteDatabase db,ODb;
     static int ss = 0;
     private SQLiteOpenHelper openHelper,ElementOptionopenHelper;
@@ -78,10 +77,8 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
     String max,imageId;
     TextView next_btn;
 
-    Map<String, String> element_data = new HashMap<String, String>();
-
+    static Map<String, String> element_data = new HashMap<String, String>();
     static Map<String, Bitmap> elementPhotos = new HashMap<String, Bitmap>();
-
 
     @SuppressLint("ResourceType")
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -108,7 +105,6 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         String camera = intent.getStringExtra("camera");
         formid = getIntent().getStringExtra("id");
         Bitmap bitmap = (Bitmap) intent.getParcelableExtra("photoImage");
-//        photo = bitmap;
         if (elementCameraId != null){
             elementPhotos.put(elementCameraId, bitmap);
         }
@@ -156,7 +152,6 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
 
         //show the element.
         showElement(checkpage);
-
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -594,7 +589,6 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
             public boolean onTouch(View v, MotionEvent event) {
                 //The following code is to disable  scroll view on gesture touchListener.
                 customScrollview.setEnableScrolling(false);
-
                 return false;
             }});
 
@@ -744,6 +738,10 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         photoImageParam.setMargins(50,10,50,5);
         photoImage.setMinimumHeight(600);
         photoImage.setLayoutParams(photoImageParam);
+        photoImage.setVisibility(View.GONE);
+        if(photoImage != null){
+            photoImage.setVisibility(View.VISIBLE);
+        }
         photoImage.setTag(id);
 
         TextView photofilepath = new TextView(this);
@@ -756,8 +754,10 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
 
         photo = elementPhotos.get(id);
         if(photo != null){
+            linearLayout.findViewWithTag(elementCameraId).setVisibility(View.VISIBLE);
             photoImage.setImageBitmap(photo);
         }
+
         uploadbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -781,25 +781,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
             Bitmap myBitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
             photofilepath.setText(getfile);
         }
-
-//        if(photo != null){
-//            System.out.println("aaaaa");
-//            showImage(elementCameraId);
-//        }
     }
-
-
-    private void showImage(String id) {
-        System.out.println(id);
-        if(photo != null){
-            System.out.println("get all photo");
-            imageView = linearLayout.findViewWithTag(id);
-            imageView.setImageBitmap(photo);
-        }
-    }
-    
-
-
 
     //spinner select function
     @Override
@@ -833,6 +815,8 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         final EditText dateEditText = new EditText(this);
         EditTextview(dateEditText);
         dateEditText.setText(dateTime);
+        dateEditText.setTag("element_" + id);
+        FormActivity.dateElementid = "element_" + id;
         dateEditText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -1017,6 +1001,8 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         numberEdit.setHint("Only number");
         numberEdit.setId(Integer.parseInt(id));
         numberEdit.setInputType(InputType.TYPE_CLASS_NUMBER);
+        numberEdit.setTag("element_" + id);
+        FormActivity.numberElementid = "element_" + id;
         linearLayout.addView(numberEdit);
     }
 
@@ -1185,9 +1171,12 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onClick(View v) {
+//                GetElementValue();
                 linearLayout.removeAllViewsInLayout();
                 showElement(showcheckbtn +1 );
             }
+
+
         });
 
         prebutton.setOnClickListener(new View.OnClickListener() {
@@ -1264,6 +1253,8 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         //set property
         titleTextview(textView);
         EditTextview(editText);
+        editText.setTag("element_" + id);
+        FormActivity.singleElementid = "element_" + id;
 
         // add the element
         linearLayout.addView(textView);
@@ -1321,8 +1312,18 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
 
         //radio button add
         for (int i = 0; i < mylist.size(); i ++){
-            RadioButton radioButtonView = new RadioButton(this);
+            final RadioButton radioButtonView = new RadioButton(this);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                radioButtonView.setId(View.generateViewId());
+            }
             radioButtonView.setText(mylist.get(i));
+            radioButtonView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    Toast.makeText(FormActivity.this, radioButtonView.getText().toString(), Toast.LENGTH_LONG).show();
+                }
+            });
             radioGroup.addView(radioButtonView, radiogroupparams);
         }
 
@@ -1409,6 +1410,23 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         // set margin and height and width
         editparams.setMargins(50, 0, 50, 5);
         editText.setLayoutParams(editparams);
+    }
+
+    private void GetElementValue() {
+        if(numberElementid != null){
+            EditText numberedit = linearLayout.findViewWithTag(numberElementid);
+            element_data.put(numberElementid, numberedit.getText().toString());
+        }
+
+        if(singleElementid != null){
+            EditText editText = linearLayout.findViewWithTag(singleElementid);
+            element_data.put(singleElementid, editText.getText().toString());
+        }
+
+        if(dateElementid != null){
+            EditText editText = linearLayout.findViewWithTag(dateElementid);
+            element_data.put(dateElementid, editText.getText().toString());
+        }
     }
 
 }
