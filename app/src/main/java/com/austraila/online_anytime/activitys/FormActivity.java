@@ -59,7 +59,7 @@ import java.util.Map;
 import static com.austraila.online_anytime.activitys.cameraActivity.CameraActivity.Image_Capture_Code;
 
 
-public class FormActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, View.OnClickListener  {
+public class FormActivity extends AppCompatActivity implements View.OnClickListener  {
     LinearLayout linearLayout;
     LinearLayout buttonsLayout;
     DatePickerDialog picker;
@@ -67,17 +67,23 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
     Bitmap photo;
     CustomScrollview customScrollview;
     Cursor cursor;
-    String formid, formDes, formtitle;
-    static String elementCameraId, numberElementid, singleElementid, dateElementid;
+    static String elementCameraId;
+    String  formid, formDes, formtitle, max, emailElementid
+            , numberElementid, singleElementid, dateElementid
+            , phone1, phone2, phone3, phoneElementid
+            , price1, price2, priceElemnetid
+            ,firstnameElementid, secondnameElementid
+            , addressElement1, addressElement2, addressElement3, addressElement4, addressElement5
+            , textareaElemnet, timeElemntid, webElementid;
+
     private SQLiteDatabase db,ODb;
-    static int ss = 0;
+    int ss = 0;
     private SQLiteOpenHelper openHelper,ElementOptionopenHelper;
     ArrayList<String> data = new ArrayList<String>();
     public int checkpage = 1;
-    String max,imageId;
     TextView next_btn;
 
-    static Map<String, String> element_data = new HashMap<String, String>();
+    Map<String, String> element_data = new HashMap<String, String>();
     static Map<String, Bitmap> elementPhotos = new HashMap<String, Bitmap>();
 
     @SuppressLint("ResourceType")
@@ -126,7 +132,6 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         formid = getIntent().getStringExtra("id");
         formDes = getIntent().getStringExtra("des");
         formtitle = getIntent().getStringExtra("title");
-        imageId = getIntent().getStringExtra("elementId");
 
         ArrayList<String> groupkeyList = new ArrayList<String>();
         cursor = db.rawQuery("SELECT *FROM " + ElementDatabaseHelper.ElEMENTTABLE_NAME + " WHERE " + ElementDatabaseHelper.ECOL_11 + "=?", new String[]{formid});
@@ -176,7 +181,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
                         fileUpload(cursor.getString(cursor.getColumnIndex("element_title")),cursor.getString(cursor.getColumnIndex("element_id")));
                         break;
                     case "email":
-                        SingleLineTest(cursor.getString(cursor.getColumnIndex("element_title")),cursor.getString(cursor.getColumnIndex("element_id")));
+                        emailLine(cursor.getString(cursor.getColumnIndex("element_title")),cursor.getString(cursor.getColumnIndex("element_id")));
                         break;
                     case "money":
                         PriceLint(cursor.getString(cursor.getColumnIndex("element_title")),cursor.getString(cursor.getColumnIndex("element_id")));
@@ -246,7 +251,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         }
     }
 
-    private void matrixLint(String title, String guidelines, String id) {
+    private void matrixLint(String title, String guidelines, final String id) {
 
         ArrayList<String> matrixList = new ArrayList<String>();
         Cursor cursor = ODb.rawQuery("SELECT *FROM " + ElementOptionDatabaseHelper.OPTIONTABLE_NAME + " WHERE " + ElementOptionDatabaseHelper.OCOL_2 + "=? AND " + ElementOptionDatabaseHelper.OCOL_3 + "=?" , new String[]{formid, id});
@@ -332,16 +337,26 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         titleText.setText(title);
         titlelayout.addView(titleText);
 
-        RadioGroup radioGroup = new RadioGroup(this);
+        final RadioGroup radioGroup = new RadioGroup(this);
         radioGroup.setOrientation(LinearLayout.HORIZONTAL);
         LinearLayout.LayoutParams radiogroupparams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
         radiogroupparams.setMargins(50,5,10, 0);
+
         for (int i = 0; i < matrixList.size(); i ++){
-            RadioButton radioButtonView = new RadioButton(this);
+            final RadioButton radioButtonView = new RadioButton(this);
             radioGroup.addView(radioButtonView, radiogroupparams);
+
+            radioButtonView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int idx = radioGroup.indexOfChild(radioButtonView);
+                    element_data.put("element_" + id, String.valueOf(idx));
+                    Toast.makeText(FormActivity.this, radioButtonView.getText().toString(), Toast.LENGTH_LONG).show();
+                }
+            });
         }
 
         itemLayout.addView(radioGroup);
@@ -361,6 +376,8 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         );
         streetaddressparams.setMargins(50,30,50,5);
         EditText streetEdit = new EditText(this);
+        streetEdit.setTag("element_" + id + "_1");
+        addressElement1 = "element_" + id + "_1";
         EditTextview(streetEdit);
 
         TextView streettitle = new TextView(this);
@@ -390,6 +407,8 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         if(address == 1){
             linearLayout.addView(stressaddress);
         }else {
+            lineEdit.setTag("element_" + id + "_2");
+            addressElement2 = "element_" + id + "_2";
             linearLayout.addView(stressaddress);
             linearLayout.addView(line2);
         }
@@ -422,6 +441,8 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
 
         EditText cityEdit = new EditText(this);
         EditTextview(cityEdit);
+        cityEdit.setTag("element_" + id + "_3");
+        addressElement3 = "element_" + id + "_3";
 
         TextView cityText = new TextView(this);
         titleTextview(cityText);
@@ -439,6 +460,8 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
 
         EditText stateEdit = new EditText(this);
         EditTextview(stateEdit);
+        stateEdit.setTag("element_" + id + "_4");
+        addressElement4 = "element_" + id + "_4";
 
         TextView stateText = new TextView(this);
         titleTextview(stateText);
@@ -471,6 +494,8 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         EditText postalEdit = new EditText(this);
         TextView postalText = new TextView(this);
         EditTextview(postalEdit);
+        postalEdit.setTag("element_" + id + "_5");
+        addressElement5 = "element_" + id + "_5";
         titleTextview(postalText);
         postalText.setTextSize(getResources().getDimension(R.dimen.textsize_normal));
         postalText.setText("Postal/Zip Code");
@@ -483,7 +508,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        Spinner countrydrop = new Spinner(this);
+        final Spinner countrydrop = new Spinner(this);
         dropdownParams.setMargins(50,0,50,0);
         countrydrop.setLayoutParams(dropdownParams);
         countrydrop.setBackground(getResources().getDrawable(R.drawable.editview_border));
@@ -492,7 +517,23 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         countrydrop.setAdapter(adapter);
         countrydrop.setSelection(3);
-        countrydrop.setOnItemSelectedListener(this);
+
+        countrydrop.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selectedItemText = (String) parent.getItemAtPosition(position);
+                // Notify the selected item text
+                Toast.makeText
+                        (getApplicationContext(), "Selected : " + selectedItemText, Toast.LENGTH_SHORT)
+                        .show();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
 
         TextView countryText = new TextView(this);
         titleTextview(countryText);
@@ -500,6 +541,8 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         countryText.setTextSize(getResources().getDimension(R.dimen.textsize_normal));
         country.addView(countrydrop);
         country.addView(countryText);
+
+
 
         linearLayout.addView(postalCountry);
     }
@@ -517,8 +560,11 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         submitBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(FormActivity.this, SuccessActivity.class);
-                startActivity(intent);
+                GetElementValue();
+                System.out.println(element_data.size());
+                System.out.println(element_data);
+//                Intent intent = new Intent(FormActivity.this, SuccessActivity.class);
+//                startActivity(intent);
             }
         });
     }
@@ -558,6 +604,8 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         webSiteTitle.setText(Html.fromHtml(title));
         EditTextview(websiteEdit);
         websiteEdit.setText("http://");
+        websiteEdit.setTag("element_" + id);
+        webElementid = "element_" + id;
 
         //add the element
         linearLayout.addView(webSiteTitle);
@@ -761,7 +809,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
                 bundle.putString("id", formid);
                 bundle.putString("formDes", formDes);
                 bundle.putString("formtitle", formtitle);
-                FormActivity.elementCameraId = id;
+                elementCameraId = id;
                 AddPhotoBottomDialogFragment addPhotoBottomDialogFragment = AddPhotoBottomDialogFragment.newInstance();
                 addPhotoBottomDialogFragment.setArguments(bundle);
                 addPhotoBottomDialogFragment.show(getSupportFragmentManager(),"add_photo_dialog_fragment");
@@ -777,17 +825,6 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
             Bitmap myBitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
             photofilepath.setText(getfile);
         }
-    }
-
-    //spinner select function
-    @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        String text = parent.getSelectedItem().toString();
-    }
-
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -812,7 +849,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         EditTextview(dateEditText);
         dateEditText.setText(dateTime);
         dateEditText.setTag("element_" + id);
-        FormActivity.dateElementid = "element_" + id;
+        dateElementid = "element_" + id;
         dateEditText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -830,6 +867,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     private void PhoneLint(String title, String id) {
+        phoneElementid = "element_" + id;
         //define the phone title
         TextView phoneTitle = new TextView(this);
         titleTextview(phoneTitle);
@@ -881,6 +919,8 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         FilterArray[0] = new InputFilter.LengthFilter(3);
         phoneNum1.setFilters(FilterArray);
         phoneNum1.setWidth(130);
+        phoneNum1.setTag("element_" + id + "_1");
+        phone1 = "element_" + id + "_1";
         phoneLinerLayout.addView(phoneNum1);
         phoneLinerLayout.addView(lineText);
         EditTextview(phoneNum2);
@@ -889,10 +929,14 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         phoneNum2.setInputType(InputType.TYPE_CLASS_NUMBER);
         phoneNum2.setFilters(FilterArray);
         phoneNum2.setWidth(130);
+        phoneNum2.setTag("element_" + id + "_2");
+        phone2 = "element_" + id + "_2";
         phoneLinerLayout.addView(phoneNum2);
         phoneLinerLayout.addView(lineText1);
         EditTextview(phoneNum3);
         phoneNum3.setHint("####");
+        phoneNum3.setTag("element_" + id + "_3");
+        phone3 = "element_" + id + "_3";
         phoneNum3.setLayoutParams(param3Num);
         phoneNum3.setInputType(InputType.TYPE_CLASS_NUMBER);
         InputFilter[] FilterArray1 = new InputFilter[1];
@@ -904,7 +948,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     private void DropDown(String title, String id) {
-
+        final String dropid = id;
         ArrayList<String> dropList = new ArrayList<String>();
         Cursor cursor = ODb.rawQuery("SELECT *FROM " + ElementOptionDatabaseHelper.OPTIONTABLE_NAME + " WHERE " + ElementOptionDatabaseHelper.OCOL_2 + "=? AND " + ElementOptionDatabaseHelper.OCOL_3 + "=?" , new String[]{formid, id});
 
@@ -936,11 +980,25 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.spinner_dropdown_item, dropList);
         adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         dropdown.setAdapter(adapter);
-        dropdown.setOnItemSelectedListener(this);
         linearLayout.addView(dropdown);
+        dropdown.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selectedItemText = (String) parent.getItemAtPosition(position);
+                element_data.put("element_" + dropid, String.valueOf(position));
+                // Notify the selected item text
+                Toast.makeText(getApplicationContext(), "Selected : " + selectedItemText, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
     }
 
-    private void CheckBoxes(String title, String id) {
+    private void CheckBoxes(String title, final String id) {
         ArrayList<String> mylist = new ArrayList<String>();
 
         Cursor cursor = ODb.rawQuery("SELECT *FROM " + ElementOptionDatabaseHelper.OPTIONTABLE_NAME + " WHERE " + ElementOptionDatabaseHelper.OCOL_2 + "=? AND " + ElementOptionDatabaseHelper.OCOL_3 + "=?" , new String[]{formid, id});
@@ -965,20 +1023,24 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
         ParmsDescription.setMargins(50,10,50,0);
+
         for(int i = 0; i < mylist.size(); i ++){
-            CheckBox checkBox = new CheckBox(this);
+            element_data.put("element_" + id + "_" + String.valueOf(i+1), "0");
+            final CheckBox checkBox = new CheckBox(this);
             checkBox.setText(mylist.get(i));
             checkBox.setTextColor(getResources().getColor(R.color.colorPrimaryDark));
             checkBox.setTextSize(getResources().getDimension(R.dimen.textsize_normal));
             checkBox.setLayoutParams(ParmsDescription);
+            final int finalI = i;
             checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    String msg = "You have " + (isChecked ? "checked" : "unchecked") + " this Check it Checkbox.";
-                    Toast.makeText(FormActivity.this, msg, Toast.LENGTH_SHORT).show();
+                    element_data.put("element_" + id + "_" + String.valueOf(finalI+1), "1");
+                    Toast.makeText(FormActivity.this, checkBox.getText().toString(), Toast.LENGTH_SHORT).show();
                 }
             });
             linearLayout.addView(checkBox);
+            //doi se. il hal lae.haw/na seng nat e.o. ne mu ja ju seng nae ni kka i jen mu sep ji ana.mam dae lo hae.sure.bye.
         }
     }
 
@@ -998,11 +1060,11 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         numberEdit.setId(Integer.parseInt(id));
         numberEdit.setInputType(InputType.TYPE_CLASS_NUMBER);
         numberEdit.setTag("element_" + id);
-        FormActivity.numberElementid = "element_" + id;
+        numberElementid = "element_" + id;
         linearLayout.addView(numberEdit);
     }
 
-    private void MediaLint(String title, String id) {
+     private void MediaLint(String title, String id) {
         //define the element
         TextView mediaTitle = new TextView(this);
         ImageView mediaImage = new ImageView(this);
@@ -1050,6 +1112,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     private void PriceLint(String title, String id) {
+        priceElemnetid = "element_" + id;
         //define elements
         TextView priceTitle = new TextView(this);
         TextView label1 = new TextView(this);
@@ -1089,6 +1152,8 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         dollarsEditText.setHint("Dollars");
         dollarsEditText.setInputType(InputType.TYPE_CLASS_NUMBER);
         dollarsEditText.setLayoutParams(params);
+        dollarsEditText.setTag("element_" + id + "_1");
+        price1 = "element_" + id + "_1";
         priceLinerlayout.addView(dollarsEditText);
 
         //set property the lable2 and add to priceLineatLayout
@@ -1113,6 +1178,8 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         FilterArray[0] = new InputFilter.LengthFilter(2);
         centEditText.setFilters(FilterArray);
         centEditText.setLayoutParams(params);
+        centEditText.setTag("element_" + id + "_2");
+        price2 = "element_" + id + "_2";
         priceLinerlayout.addView(centEditText);
 
         //set property the price Title
@@ -1167,9 +1234,12 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onClick(View v) {
-//                GetElementValue();
+                GetElementValue();
                 linearLayout.removeAllViewsInLayout();
                 showElement(showcheckbtn +1 );
+                System.out.println(element_data.size());
+                System.out.println(element_data);
+
             }
 
 
@@ -1192,6 +1262,8 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         TextView timeTitle = new TextView(this);
         final EditText editText = new EditText(this);
         EditTextview(editText);
+        editText.setTag("element_" + id);
+        timeElemntid = "element_" + id;
         editText.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
@@ -1250,7 +1322,26 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         titleTextview(textView);
         EditTextview(editText);
         editText.setTag("element_" + id);
-        FormActivity.singleElementid = "element_" + id;
+        singleElementid = "element_" + id;
+
+        // add the element
+        linearLayout.addView(textView);
+        linearLayout.addView(editText);
+    }
+
+    public void emailLine (String title, String id){
+        // define the textview and Edittext
+        TextView textView =  new TextView(this);
+        EditText editText = new EditText(this);
+
+        // set text in textview.
+        textView.setText(Html.fromHtml(title));
+
+        //set property
+        titleTextview(textView);
+        EditTextview(editText);
+        editText.setTag("element_" + id);
+        emailElementid = "element_" + id;
 
         // add the element
         linearLayout.addView(textView);
@@ -1269,6 +1360,8 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         EditTextview(textArea);
         textArea.setSingleLine(false);
         textArea.setLines(5);
+        textArea.setTag("element_" + id);
+        textareaElemnet = "element_" + id;
         textArea.setGravity(View.TEXT_ALIGNMENT_TEXT_START);
 
         // add the element
@@ -1276,7 +1369,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         linearLayout.addView(textArea);
     }
 
-    private void MultipleChoice(String title, String id) {
+    private void MultipleChoice(String title, final String id) {
         ArrayList<String> mylist = new ArrayList<String>();
 
         Cursor cursor = ODb.rawQuery("SELECT *FROM " + ElementOptionDatabaseHelper.OPTIONTABLE_NAME + " WHERE " + ElementOptionDatabaseHelper.OCOL_2 + "=? AND " + ElementOptionDatabaseHelper.OCOL_3 + "=?" , new String[]{formid, id});
@@ -1292,7 +1385,7 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
 
         // define the radio group and title
         TextView radiotitle = new TextView(this);
-        RadioGroup radioGroup = new RadioGroup(this);
+        final RadioGroup radioGroup = new RadioGroup(this);
 
         //set property the radiotile
         radiotitle.setText(Html.fromHtml(title));
@@ -1316,8 +1409,9 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
             radioButtonView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
-                    Toast.makeText(FormActivity.this, radioButtonView.getText().toString(), Toast.LENGTH_LONG).show();
+                int idx = radioGroup.indexOfChild(radioButtonView);
+                element_data.put("element_" + id, String.valueOf(idx));
+                Toast.makeText(FormActivity.this, radioButtonView.getText().toString(), Toast.LENGTH_LONG).show();
                 }
             });
             radioGroup.addView(radioButtonView, radiogroupparams);
@@ -1356,6 +1450,8 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         EditTextview(firstname);
         firstname.setWidth(350);
         firstname.setHint("First Name");
+        firstname.setTag("element_" + id + "_1");
+        firstnameElementid = "element_" + id + "_1";
         firstname.setLayoutParams(firstnameparams);
 
         // set property the last name
@@ -1367,6 +1463,8 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         EditTextview(lastname);
         lastname.setWidth(500);
         lastname.setHint("Last Name");
+        lastname.setTag("element_" + id + "_2");
+        secondnameElementid = "element_" + id + "_2";
         lastname.setLayoutParams(lastnameparams);
 
         // add the first and last name in namelineatlayout
@@ -1412,16 +1510,114 @@ public class FormActivity extends AppCompatActivity implements AdapterView.OnIte
         if(numberElementid != null){
             EditText numberedit = linearLayout.findViewWithTag(numberElementid);
             element_data.put(numberElementid, numberedit.getText().toString());
+            linearLayout.removeView(numberedit);
+            numberElementid =null;
         }
 
         if(singleElementid != null){
             EditText editText = linearLayout.findViewWithTag(singleElementid);
             element_data.put(singleElementid, editText.getText().toString());
+            linearLayout.removeView(editText);
+            singleElementid = null;
+        }
+
+        if(emailElementid != null){
+            EditText editText = linearLayout.findViewWithTag(emailElementid);
+            element_data.put(emailElementid, editText.getText().toString());
+            linearLayout.removeView(editText);
+            singleElementid = null;
         }
 
         if(dateElementid != null){
             EditText editText = linearLayout.findViewWithTag(dateElementid);
             element_data.put(dateElementid, editText.getText().toString());
+            linearLayout.removeView(editText);
+            dateElementid = null;
+        }
+
+        if(phone1 != null || phone2 != null || phone3 != null){
+            EditText ph1 = linearLayout.findViewWithTag(phone1);
+            EditText ph2 = linearLayout.findViewWithTag(phone2);
+            EditText ph3 = linearLayout.findViewWithTag(phone3);
+            element_data.put(phoneElementid, ph1.getText().toString() + ph2.getText().toString() + ph3.getText().toString());
+            linearLayout.removeView(ph1);
+            linearLayout.removeView(ph2);
+            linearLayout.removeView(ph3);
+            phone1 = null;
+            phone2 = null;
+            phone3 = null;
+        }
+
+        if(price1 != null || price2 != null){
+            EditText pric1 = linearLayout.findViewWithTag(price1);
+            EditText pric2 = linearLayout.findViewWithTag(price2);
+            element_data.put(priceElemnetid, pric1.getText().toString() + "." + pric2.getText().toString());
+            linearLayout.removeView(pric1);
+            linearLayout.removeView(pric1);
+            price1 = null;
+            price2 = null;
+        }
+
+        if(firstnameElementid != null || secondnameElementid != null){
+            EditText firstname = linearLayout.findViewWithTag(firstnameElementid);
+            EditText lastname = linearLayout.findViewWithTag(secondnameElementid);
+            element_data.put(firstnameElementid, firstname.getText().toString());
+            element_data.put(secondnameElementid, lastname.getText().toString());
+            linearLayout.removeView(firstname);
+            linearLayout.removeView(lastname);
+            firstnameElementid = null;
+            secondnameElementid = null;
+
+        }
+
+        if(addressElement1 != null || addressElement3 != null){
+            EditText ad1 = linearLayout.findViewWithTag(addressElement1);
+            if(addressElement2 != null){
+                EditText ad2 = linearLayout.findViewWithTag(addressElement2);
+                if(ad2.getText().toString().equals("")){
+                    Toast.makeText(FormActivity.this, "Please enter a Address Line 2.", Toast.LENGTH_LONG).show();
+                    return;
+                }
+                element_data.put(addressElement2, ad2.getText().toString());
+                linearLayout.removeView(ad2);
+                addressElement2 = null;
+            }
+            EditText ad3 = linearLayout.findViewWithTag(addressElement3);
+            EditText ad4 = linearLayout.findViewWithTag(addressElement4);
+            EditText ad5 = linearLayout.findViewWithTag(addressElement5);
+            element_data.put(addressElement1, ad1.getText().toString());
+            element_data.put(addressElement3, ad3.getText().toString());
+            element_data.put(addressElement4, ad4.getText().toString());
+            element_data.put(addressElement5, ad5.getText().toString());
+            linearLayout.removeView(ad1);
+            linearLayout.removeView(ad3);
+            linearLayout.removeView(ad4);
+            linearLayout.removeView(ad5);
+            addressElement1 = null;
+            addressElement3 = null;
+            addressElement4 = null;
+            addressElement5 = null;
+        }
+
+        if(textareaElemnet != null){
+            EditText editText = linearLayout.findViewWithTag(textareaElemnet);
+            element_data.put(textareaElemnet, editText.getText().toString());
+            linearLayout.removeView(editText);
+            textareaElemnet = null;
+        }
+
+        if(timeElemntid != null){
+            EditText timeeditText = linearLayout.findViewWithTag(timeElemntid);
+            element_data.put(timeElemntid, timeeditText.getText().toString());
+            linearLayout.removeView(timeeditText);
+            timeElemntid = null;
+        }
+
+        if(webElementid != null){
+            EditText editText = linearLayout.findViewWithTag(webElementid);
+            element_data.put(webElementid,editText.getText().toString());
+            linearLayout.removeView(editText);
+            webElementid = null;
         }
     }
 
