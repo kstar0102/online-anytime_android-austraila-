@@ -125,7 +125,8 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         backTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onBackPressed();
+                Intent intent = new Intent(FormActivity.this, MainActivity.class);
+                startActivity(intent);
             }
         });
         //get title and des form main activity
@@ -365,6 +366,7 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void AddressLint(String title, int address, String id) {
+        final String addressid = id;
         TextView addressTitle = new TextView(this);
         titleTextview(addressTitle);
         addressTitle.setText(title);
@@ -378,6 +380,10 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         EditText streetEdit = new EditText(this);
         streetEdit.setTag("element_" + id + "_1");
         addressElement1 = "element_" + id + "_1";
+        String addstr = element_data.get(addressElement1);
+        if(addstr != null){
+            streetEdit.setText(addstr);
+        }
         EditTextview(streetEdit);
 
         TextView streettitle = new TextView(this);
@@ -409,6 +415,10 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         }else {
             lineEdit.setTag("element_" + id + "_2");
             addressElement2 = "element_" + id + "_2";
+            String addlin = element_data.get(addressElement2);
+            if(addlin != null){
+                lineEdit.setText(addlin);
+            }
             linearLayout.addView(stressaddress);
             linearLayout.addView(line2);
         }
@@ -443,6 +453,10 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         EditTextview(cityEdit);
         cityEdit.setTag("element_" + id + "_3");
         addressElement3 = "element_" + id + "_3";
+        String cityL = element_data.get(addressElement3);
+        if(cityL != null){
+            cityEdit.setText(cityL);
+        }
 
         TextView cityText = new TextView(this);
         titleTextview(cityText);
@@ -462,6 +476,10 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         EditTextview(stateEdit);
         stateEdit.setTag("element_" + id + "_4");
         addressElement4 = "element_" + id + "_4";
+        String stateL = element_data.get(addressElement4);
+        if(stateL != null){
+            stateEdit.setText(stateL);
+        }
 
         TextView stateText = new TextView(this);
         titleTextview(stateText);
@@ -496,6 +514,10 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         EditTextview(postalEdit);
         postalEdit.setTag("element_" + id + "_5");
         addressElement5 = "element_" + id + "_5";
+        String postL = element_data.get(addressElement5);
+        if(postL != null){
+            postalEdit.setText(postL);
+        }
         titleTextview(postalText);
         postalText.setTextSize(getResources().getDimension(R.dimen.textsize_normal));
         postalText.setText("Postal/Zip Code");
@@ -523,9 +545,7 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selectedItemText = (String) parent.getItemAtPosition(position);
                 // Notify the selected item text
-                Toast.makeText
-                        (getApplicationContext(), "Selected : " + selectedItemText, Toast.LENGTH_SHORT)
-                        .show();
+                element_data.put("element_" + addressid + "_6", selectedItemText);
             }
 
             @Override
@@ -541,8 +561,6 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         countryText.setTextSize(getResources().getDimension(R.dimen.textsize_normal));
         country.addView(countrydrop);
         country.addView(countryText);
-
-
 
         linearLayout.addView(postalCountry);
     }
@@ -606,6 +624,10 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         websiteEdit.setText("http://");
         websiteEdit.setTag("element_" + id);
         webElementid = "element_" + id;
+        String webL = element_data.get(webElementid);
+        if(webL != null){
+            websiteEdit.setText(webL);
+        }
 
         //add the element
         linearLayout.addView(webSiteTitle);
@@ -850,6 +872,11 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         dateEditText.setText(dateTime);
         dateEditText.setTag("element_" + id);
         dateElementid = "element_" + id;
+        String dateL = element_data.get(dateElementid);
+        if(dateL != null){
+            dateEditText.setText(dateL);
+        }
+
         dateEditText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -911,6 +938,7 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
         param3Num.setMargins(10,0,10,0);
+
         EditTextview(phoneNum1);
         phoneNum1.setHint("###");
         phoneNum1.setLayoutParams(param3Num);
@@ -921,8 +949,13 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         phoneNum1.setWidth(130);
         phoneNum1.setTag("element_" + id + "_1");
         phone1 = "element_" + id + "_1";
+        String ph1L = element_data.get(phone1);
+        if(ph1L != null){
+            phoneNum1.setText(ph1L);
+        }
         phoneLinerLayout.addView(phoneNum1);
         phoneLinerLayout.addView(lineText);
+
         EditTextview(phoneNum2);
         phoneNum2.setHint("###");
         phoneNum2.setLayoutParams(param3Num);
@@ -931,12 +964,21 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         phoneNum2.setWidth(130);
         phoneNum2.setTag("element_" + id + "_2");
         phone2 = "element_" + id + "_2";
+        String ph2L = element_data.get(phone2);
+        if(ph2L != null){
+            phoneNum2.setText(ph2L);
+        }
         phoneLinerLayout.addView(phoneNum2);
+
         phoneLinerLayout.addView(lineText1);
         EditTextview(phoneNum3);
         phoneNum3.setHint("####");
         phoneNum3.setTag("element_" + id + "_3");
         phone3 = "element_" + id + "_3";
+        String ph3L = element_data.get(phone3);
+        if(ph3L != null){
+            phoneNum3.setText(ph3L);
+        }
         phoneNum3.setLayoutParams(param3Num);
         phoneNum3.setInputType(InputType.TYPE_CLASS_NUMBER);
         InputFilter[] FilterArray1 = new InputFilter[1];
@@ -987,7 +1029,7 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
                 String selectedItemText = (String) parent.getItemAtPosition(position);
                 element_data.put("element_" + dropid, String.valueOf(position));
                 // Notify the selected item text
-                Toast.makeText(getApplicationContext(), "Selected : " + selectedItemText, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getApplicationContext(), "Selected : " + selectedItemText, Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -1061,6 +1103,10 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         numberEdit.setInputType(InputType.TYPE_CLASS_NUMBER);
         numberEdit.setTag("element_" + id);
         numberElementid = "element_" + id;
+        String num = element_data.get(numberElementid);
+        if(num != null){
+            numberEdit.setText(num);
+        }
         linearLayout.addView(numberEdit);
     }
 
@@ -1154,6 +1200,10 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         dollarsEditText.setLayoutParams(params);
         dollarsEditText.setTag("element_" + id + "_1");
         price1 = "element_" + id + "_1";
+        String dol = element_data.get(price1);
+        if(dol != null){
+            dollarsEditText.setText(dol);
+        }
         priceLinerlayout.addView(dollarsEditText);
 
         //set property the lable2 and add to priceLineatLayout
@@ -1180,6 +1230,10 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         centEditText.setLayoutParams(params);
         centEditText.setTag("element_" + id + "_2");
         price2 = "element_" + id + "_2";
+        String cen = element_data.get(price2);
+        if(cen != null){
+            centEditText.setText(cen);
+        }
         priceLinerlayout.addView(centEditText);
 
         //set property the price Title
@@ -1264,6 +1318,12 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         EditTextview(editText);
         editText.setTag("element_" + id);
         timeElemntid = "element_" + id;
+
+        String timeL = element_data.get(timeElemntid);
+        if(timeL != null){
+            editText.setText(timeL);
+        }
+
         editText.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
@@ -1323,6 +1383,10 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         EditTextview(editText);
         editText.setTag("element_" + id);
         singleElementid = "element_" + id;
+        String single = element_data.get(singleElementid);
+        if(single != null){
+            editText.setText(single);
+        }
 
         // add the element
         linearLayout.addView(textView);
@@ -1342,6 +1406,10 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         EditTextview(editText);
         editText.setTag("element_" + id);
         emailElementid = "element_" + id;
+        String email = element_data.get(emailElementid);
+        if(email != null){
+            editText.setText(email);
+        }
 
         // add the element
         linearLayout.addView(textView);
@@ -1362,6 +1430,10 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         textArea.setLines(5);
         textArea.setTag("element_" + id);
         textareaElemnet = "element_" + id;
+        String area = element_data.get(textareaElemnet);
+        if(area != null){
+            textArea.setText(area);
+        }
         textArea.setGravity(View.TEXT_ALIGNMENT_TEXT_START);
 
         // add the element
@@ -1452,6 +1524,10 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         firstname.setHint("First Name");
         firstname.setTag("element_" + id + "_1");
         firstnameElementid = "element_" + id + "_1";
+        String first = element_data.get(firstnameElementid);
+        if(first != null){
+            firstname.setText(first);
+        }
         firstname.setLayoutParams(firstnameparams);
 
         // set property the last name
@@ -1465,6 +1541,10 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         lastname.setHint("Last Name");
         lastname.setTag("element_" + id + "_2");
         secondnameElementid = "element_" + id + "_2";
+        String second = element_data.get(secondnameElementid);
+        if(second != null){
+            lastname.setText(second);
+        }
         lastname.setLayoutParams(lastnameparams);
 
         // add the first and last name in namelineatlayout
