@@ -44,6 +44,10 @@ public class SuccessActivity extends AppCompatActivity {
 
         getSupportActionBar().hide();
 
+        Intent intent = getIntent();
+        HashMap<String, String> hashMap = (HashMap<String, String>)intent.getSerializableExtra("elementData");
+        System.out.println(hashMap);
+
         openHelper = new DatabaseHelper(this);
         db = openHelper.getWritableDatabase();
 

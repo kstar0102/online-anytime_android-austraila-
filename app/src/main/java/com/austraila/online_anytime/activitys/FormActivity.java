@@ -3,6 +3,7 @@ package com.austraila.online_anytime.activitys;
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -14,6 +15,7 @@ import android.icu.util.Calendar;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.text.Html;
 import android.text.InputFilter;
@@ -44,12 +46,14 @@ import com.austraila.online_anytime.Common.Common;
 import com.austraila.online_anytime.Common.CustomScrollview;
 import com.austraila.online_anytime.LocalManage.ElementDatabaseHelper;
 import com.austraila.online_anytime.LocalManage.ElementOptionDatabaseHelper;
+import com.austraila.online_anytime.LocalManage.ElementValueDatabaeHelper;
 import com.austraila.online_anytime.R;
 import com.austraila.online_anytime.Common.AddPhotoBottomDialogFragment;
 import com.austraila.online_anytime.activitys.signature.SignatureView;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -76,9 +80,9 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
             , addressElement1, addressElement2, addressElement3, addressElement4, addressElement5
             , textareaElemnet, timeElemntid, webElementid;
 
-    private SQLiteDatabase db,ODb;
+    private SQLiteDatabase db,ODb,VDb;
     int ss = 0;
-    private SQLiteOpenHelper openHelper,ElementOptionopenHelper;
+    private SQLiteOpenHelper openHelper,ElementOptionopenHelper, ElementValueopenHeloer;
     ArrayList<String> data = new ArrayList<String>();
     public int checkpage = 1;
     TextView next_btn;
@@ -92,26 +96,36 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_formtest);
+
         getSupportActionBar().hide();
-        System.out.println(elementCameraId);
+
+        //Local database define.
         openHelper = new ElementDatabaseHelper(this);
         ElementOptionopenHelper = new ElementOptionDatabaseHelper(this);
+        ElementValueopenHeloer = new ElementValueDatabaeHelper(this);
         db = openHelper.getReadableDatabase();
         ODb = ElementOptionopenHelper.getReadableDatabase();
+        VDb = ElementValueopenHeloer.getWritableDatabase();
 
+        //define the custom Scroll.
         customScrollview = (CustomScrollview) findViewById(R.id.scrollmain);
         customScrollview.setEnableScrolling(true);
 
         next_btn = findViewById(R.id.next_textBtn);
 
+        //define the main Layout
         linearLayout = findViewById(R.id.linear_layout);
         linearLayout.setOrientation(LinearLayout.VERTICAL);
 
+        //get value from other activity
         Intent intent = getIntent();
-        String camera = intent.getStringExtra("camera");
         formid = getIntent().getStringExtra("id");
+        formDes = getIntent().getStringExtra("des");
+        formtitle = getIntent().getStringExtra("title");
+        String camera = intent.getStringExtra("camera");
         Bitmap bitmap = (Bitmap) intent.getParcelableExtra("photoImage");
 
+        //get camera data.
         if (elementCameraId != null){
             elementPhotos.put(elementCameraId, bitmap);
         }
@@ -121,6 +135,7 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
             startActivityForResult(cInt,Image_Capture_Code);
         }
 
+        //go back button
         TextView backTextView = findViewById(R.id.back_textview);
         backTextView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -129,11 +144,8 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(intent);
             }
         });
-        //get title and des form main activity
-        formid = getIntent().getStringExtra("id");
-        formDes = getIntent().getStringExtra("des");
-        formtitle = getIntent().getStringExtra("title");
 
+        //get max pagenumber.
         ArrayList<String> groupkeyList = new ArrayList<String>();
         cursor = db.rawQuery("SELECT *FROM " + ElementDatabaseHelper.ElEMENTTABLE_NAME + " WHERE " + ElementDatabaseHelper.ECOL_11 + "=?", new String[]{formid});
         if (cursor.moveToFirst()){
@@ -149,7 +161,6 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         cursor.close();
 
         max = groupkeyList.get(0);
-
         for (int i = 1; i < groupkeyList.size(); i++) {
             if (Integer.parseInt(groupkeyList.get(i)) > Integer.parseInt(max)) {
                 max = groupkeyList.get(i);
@@ -162,12 +173,16 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void showElement(int i) {
+        //Go top page on scrollview
         customScrollview.fullScroll(CustomScrollview.FOCUS_UP);
+
         //make the Page title
         setTextTitle();
 
+        // get value selected page from local database.
         cursor = db.rawQuery("SELECT *FROM " + ElementDatabaseHelper.ElEMENTTABLE_NAME + " WHERE " + ElementDatabaseHelper.ECOL_11 + "=? AND " + ElementDatabaseHelper.ECOL_7 + "=?", new String[]{formid, String.valueOf(i)});
 
+        //UI dynamic generate
         if (cursor.moveToFirst()){
             do{
                 data.add(cursor.getString(cursor.getColumnIndex("element_type")));
@@ -239,6 +254,7 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         }
         cursor.close();
 
+        // get end page. submit button.
         if(i == Integer.parseInt(max)){
             submitButton();
             next_btn.setText("Submit");
@@ -253,10 +269,9 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void matrixLint(String title, String guidelines, final String id) {
-
+        //get value for matrix from local database
         ArrayList<String> matrixList = new ArrayList<String>();
         Cursor cursor = ODb.rawQuery("SELECT *FROM " + ElementOptionDatabaseHelper.OPTIONTABLE_NAME + " WHERE " + ElementOptionDatabaseHelper.OCOL_2 + "=? AND " + ElementOptionDatabaseHelper.OCOL_3 + "=?" , new String[]{formid, id});
-
         if(cursor.moveToFirst()){
             do{
                 String data = cursor.getString(cursor.getColumnIndex("OOption"));
@@ -266,6 +281,7 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         }
         cursor.close();
 
+        //define Layout for matrix
         LinearLayout.LayoutParams matrixParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -275,6 +291,7 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         matrixLayout.setOrientation(LinearLayout.HORIZONTAL);
         matrixLayout.setLayoutParams(matrixParams);
 
+        // define the title field on matrix
         LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(500, LinearLayout.LayoutParams.WRAP_CONTENT);
         titleParams.setMargins(0,0,10,0);
         LinearLayout titlelayout = new LinearLayout(this);
@@ -282,6 +299,7 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         titlelayout.setWeightSum(1);
         titlelayout.setLayoutParams(titleParams);
 
+        //define the radio group on matrix
         LinearLayout.LayoutParams itemParams = new LinearLayout.LayoutParams(550, LinearLayout.LayoutParams.WRAP_CONTENT);
         itemParams.setMargins(10,0,0,0);
         LinearLayout itemLayout = new LinearLayout(this);
@@ -295,6 +313,7 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         TextView matrixTitle = new TextView(this);
         titleTextview(matrixTitle);
 
+        //define the header department on matrix
         LinearLayout headLayout = new LinearLayout(this);
         LinearLayout.LayoutParams headLayoutParam = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -312,7 +331,6 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         empty.setLayoutParams(emptyParam);
         headLayout.addView(empty);
         headLayout.addView(headtitle);
-
 
 
         if(guidelines.isEmpty()){
@@ -338,6 +356,7 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         titleText.setText(title);
         titlelayout.addView(titleText);
 
+        // set the radio group
         final RadioGroup radioGroup = new RadioGroup(this);
         radioGroup.setOrientation(LinearLayout.HORIZONTAL);
         LinearLayout.LayoutParams radiogroupparams = new LinearLayout.LayoutParams(
@@ -361,23 +380,27 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         itemLayout.addView(radioGroup);
-
         linearLayout.addView(matrixLayout);
     }
 
     private void AddressLint(String title, int address, String id) {
+        //define the element id.
         final String addressid = id;
         TextView addressTitle = new TextView(this);
+
+        //set the address title.
         titleTextview(addressTitle);
         addressTitle.setText(title);
         linearLayout.addView(addressTitle);
 
+        //set the street Address.
         LinearLayout.LayoutParams streetaddressparams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
         streetaddressparams.setMargins(50,30,50,5);
         EditText streetEdit = new EditText(this);
+        //set tag and check the value
         streetEdit.setTag("element_" + id + "_1");
         addressElement1 = "element_" + id + "_1";
         String addstr = element_data.get(addressElement1);
@@ -396,6 +419,7 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         stressaddress.addView(streetEdit);
         stressaddress.addView(streettitle);
 
+        //set the line2 Address
         LinearLayout line2 = new LinearLayout(this);
         line2.setOrientation(LinearLayout.VERTICAL);
 
@@ -423,6 +447,7 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
             linearLayout.addView(line2);
         }
 
+        //set the city and state address
         LinearLayout.LayoutParams CityStateparams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -448,7 +473,7 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         cityparams.setMargins(0,0,10,0);
         addresscity.setLayoutParams(cityparams);
 
-
+        //set the city address
         EditText cityEdit = new EditText(this);
         EditTextview(cityEdit);
         cityEdit.setTag("element_" + id + "_3");
@@ -462,8 +487,7 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         titleTextview(cityText);
         cityText.setTextSize(getResources().getDimension(R.dimen.textsize_normal));
         cityText.setText("City");
-//
-//
+
         addressstate.setOrientation(LinearLayout.VERTICAL);
         LinearLayout.LayoutParams stateparma = new LinearLayout.LayoutParams(
                 530,
@@ -581,8 +605,14 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
                 GetElementValue();
                 System.out.println(element_data.size());
                 System.out.println(element_data);
-//                Intent intent = new Intent(FormActivity.this, SuccessActivity.class);
-//                startActivity(intent);
+        for (Map.Entry<String, String> entry : element_data.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+//            insertData(key, value, formid);
+        }
+        Intent intent = new Intent(FormActivity.this, SuccessActivity.class);
+        intent.putExtra("elementData", (Serializable) element_data);
+        startActivity(intent);
             }
         });
     }
@@ -1292,7 +1322,7 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
                 linearLayout.removeAllViewsInLayout();
                 showElement(showcheckbtn +1 );
                 System.out.println(element_data.size());
-                System.out.println(element_data);
+                System.out.println(element_data.keySet());
 
             }
 
@@ -1605,7 +1635,7 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
             EditText editText = linearLayout.findViewWithTag(emailElementid);
             element_data.put(emailElementid, editText.getText().toString());
             linearLayout.removeView(editText);
-            singleElementid = null;
+            emailElementid = null;
         }
 
         if(dateElementid != null){
@@ -1701,6 +1731,14 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    private void insertData(String elementkye, String elementValue, String elementformid) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(ElementValueDatabaeHelper.VCOL_2, elementkye);
+        contentValues.put(ElementValueDatabaeHelper.VCOL_3, elementValue);
+        contentValues.put(ElementValueDatabaeHelper.VCOL_4, elementformid);
+        System.out.println(contentValues);
+        VDb.insert(ElementValueDatabaeHelper.VTABLE_NAME,null,contentValues);
+    }
 }
 
 
