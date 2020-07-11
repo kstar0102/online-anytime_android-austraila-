@@ -8,7 +8,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.icu.util.Calendar;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,6 +31,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.austraila.online_anytime.Common.Common;
 import com.austraila.online_anytime.LocalManage.DatabaseHelper;
+import com.austraila.online_anytime.LocalManage.ElementValueDatabaeHelper;
 import com.austraila.online_anytime.R;
 import com.austraila.online_anytime.activitys.LoginDepartment.LoginActivity;
 import com.google.android.material.navigation.NavigationView;
@@ -41,21 +41,27 @@ import org.json.JSONObject;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class SettingActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener  {
-    private SQLiteDatabase db;
-    private SQLiteOpenHelper openHelper;
+    private SQLiteDatabase db, VDb;
+    private SQLiteOpenHelper openHelper, ElementValueHelper;
     DrawerLayout settinglayout;
     private NavigationView navigation;
     RelativeLayout loading;
     TextView setting_name, setting_email,setting_time,sidemenu_email;
     ImageView side_menu_setting;
     Button sync_btn;
-    String useremail, username, userpass,result;
+    String useremail, username, userpass, result, formId,ElementValue, ElementId;
     RequestQueue queue;
+    Map<String, List<String>> elementData = new HashMap<String, List<String>>();
+    List<String> value = new ArrayList<String>();
+    Map<String, Map<String, String>> elementdata = new HashMap<String, Map<String, String>>();
+    Map<String, String> Data = new HashMap<String, String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,8 +73,35 @@ public class SettingActivity extends AppCompatActivity implements NavigationView
         loading = findViewById(R.id.loadingSetting);
 
         openHelper = new DatabaseHelper(this);
+        ElementValueHelper = new ElementValueDatabaeHelper(this);
         db = openHelper.getWritableDatabase();
+        VDb = ElementValueHelper.getReadableDatabase();
 
+        //get Form element data from local database.
+        final Cursor Vcursor = VDb.rawQuery("SELECT *FROM " + ElementValueDatabaeHelper.VTABLE_NAME,  null);
+        if(Vcursor != null){
+            if (Vcursor.moveToFirst()){
+                do{
+                    formId = Vcursor.getString(Vcursor.getColumnIndex("ElementFormId"));
+                    ElementId = Vcursor.getString(Vcursor.getColumnIndex("ElementId"));
+                    ElementValue = Vcursor.getString(Vcursor.getColumnIndex("ElementValue"));
+                    Data.put(ElementId,ElementValue);
+                    elementdata.put(formId, Data);
+                    value.add(formId);
+//                    value.add(ElementId);
+//                    value.add(ElementValue);
+//                    elementData.put(formId, value);
+                }while(Vcursor.moveToNext());
+            }
+            Vcursor.close();
+        }
+        System.out.println(value);
+        System.out.println(elementdata.get(formId));
+
+
+//        elementdata.get(formId);
+
+        //get User information form local database.
         final Cursor cursor = db.rawQuery("SELECT *FROM " + DatabaseHelper.TABLE_NAME,  null);
         if(cursor != null){
             if (cursor.moveToFirst()){

@@ -71,8 +71,8 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
     Bitmap photo;
     CustomScrollview customScrollview;
     Cursor cursor;
-    static String elementCameraId;
-    String  formid, formDes, formtitle, max, emailElementid
+    static public String elementCameraId;
+    String  formid, formDes, formtitle, max, emailElementid, signauterElementid
             , numberElementid, singleElementid, dateElementid
             , phone1, phone2, phone3, phoneElementid
             , price1, price2, priceElemnetid
@@ -608,9 +608,10 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         for (Map.Entry<String, String> entry : element_data.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
-//            insertData(key, value, formid);
+            insertData(key, value, formid);
         }
         Intent intent = new Intent(FormActivity.this, SuccessActivity.class);
+        intent.putExtra("FormId", formid);
         intent.putExtra("elementData", (Serializable) element_data);
         startActivity(intent);
             }
@@ -679,6 +680,9 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         signview.setLayoutParams(signviewParma);
         signview.setOrientation(LinearLayout.VERTICAL);
         signview.setMinimumHeight(500);
+        signview.setTag("element_" + id);
+        signauterElementid = "element_" + id;
+
 
         this.buttonsLayout = this.buttonsLayout();
         this.signatureView = new SignatureView(this);
@@ -743,6 +747,7 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
 
         // save the signature
         if (tag.equalsIgnoreCase("save")) {
+            elementPhotos.put(signauterElementid, this.signatureView.getSignature());
             this.saveImage(this.signatureView.getSignature());
             customScrollview.setEnableScrolling(true);
         }
@@ -839,7 +844,7 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         photoImage.setMinimumHeight(500);
         photoImage.setLayoutParams(photoImageParam);
 
-        photoImage.setTag(id);
+        photoImage.setTag("element_" + id);
 
         TextView photofilepath = new TextView(this);
         titleTextview(photofilepath);
@@ -849,7 +854,7 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         linearLayout.addView(photoImage);
         linearLayout.addView(photofilepath);
 
-        photo = elementPhotos.get(id);
+        photo = elementPhotos.get("element_" + id);
         if(photo != null){
             photoImage.setImageBitmap(photo);
         }
@@ -861,7 +866,7 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
                 bundle.putString("id", formid);
                 bundle.putString("formDes", formDes);
                 bundle.putString("formtitle", formtitle);
-                elementCameraId = id;
+                elementCameraId = "element_" +  id;
                 AddPhotoBottomDialogFragment addPhotoBottomDialogFragment = AddPhotoBottomDialogFragment.newInstance();
                 addPhotoBottomDialogFragment.setArguments(bundle);
                 addPhotoBottomDialogFragment.show(getSupportFragmentManager(),"add_photo_dialog_fragment");
@@ -1321,11 +1326,8 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
                 GetElementValue();
                 linearLayout.removeAllViewsInLayout();
                 showElement(showcheckbtn +1 );
-                System.out.println(element_data.size());
-                System.out.println(element_data.keySet());
-
+                System.out.println(elementPhotos);
             }
-
 
         });
 

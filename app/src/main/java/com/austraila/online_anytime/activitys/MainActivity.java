@@ -228,7 +228,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void init() {
-
         //Connect the Api
         String url = Common.getInstance().getMainItemUrl();
         StringRequest postRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
