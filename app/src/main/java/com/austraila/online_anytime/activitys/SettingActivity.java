@@ -23,6 +23,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -56,8 +57,9 @@ public class SettingActivity extends AppCompatActivity implements NavigationView
     TextView setting_name, setting_email,setting_time,sidemenu_email;
     ImageView side_menu_setting;
     Button sync_btn;
-    String useremail, username, userpass, result, formId,ElementValue, ElementId;
+    String useremail, username, userpass, token, result, formId,ElementValue, ElementId;
     RequestQueue queue;
+    ArrayList<String> groupkeyList = new ArrayList<String>();
     Map<String, List<String>> elementData = new HashMap<String, List<String>>();
     List<String> value = new ArrayList<String>();
     Map<String, Map<String, String>> elementdata = new HashMap<String, Map<String, String>>();
@@ -88,18 +90,22 @@ public class SettingActivity extends AppCompatActivity implements NavigationView
                     Data.put(ElementId,ElementValue);
                     elementdata.put(formId, Data);
                     value.add(formId);
-//                    value.add(ElementId);
-//                    value.add(ElementValue);
-//                    elementData.put(formId, value);
                 }while(Vcursor.moveToNext());
             }
             Vcursor.close();
         }
-        System.out.println(value);
+
         System.out.println(elementdata.get(formId));
 
-
-//        elementdata.get(formId);
+        for(int i = 0; i < value.size(); i++){
+            String key = value.get(i);
+            if(!groupkeyList.contains(key)){
+                groupkeyList.add(key);
+            }else{
+                continue;
+            }
+        }
+        System.out.println(groupkeyList);
 
         //get User information form local database.
         final Cursor cursor = db.rawQuery("SELECT *FROM " + DatabaseHelper.TABLE_NAME,  null);
@@ -109,6 +115,7 @@ public class SettingActivity extends AppCompatActivity implements NavigationView
                     useremail = cursor.getString(cursor.getColumnIndex("Gmail"));
                     username = cursor.getString(cursor.getColumnIndex("username"));
                     userpass = cursor.getString(cursor.getColumnIndex("Password"));
+                    token = cursor.getString(cursor.getColumnIndex("token"));
                 }while(cursor.moveToNext());
             }
             cursor.close();
@@ -129,65 +136,9 @@ public class SettingActivity extends AppCompatActivity implements NavigationView
             @Override
             public void onClick(View v) {
                 loading.setVisibility(View.VISIBLE);
-                String url = Common.getInstance().getBaseURL() + Common.getInstance().getApiKey();
-                StringRequest postRequest = new StringRequest(Request.Method.POST, url,
-                        new Response.Listener<String>() {
-                            @Override
-                            public void onResponse(String response) {
-                                System.out.println(response);
-                                JSONObject jsonObject = null;
-                                try {
-                                    jsonObject = new JSONObject(response);
-                                    result = jsonObject.getString("success");
-                                    if (result.equals("true")){
-                                        loading.setVisibility(View.GONE);
-                                        setting_email.setText(useremail);
-                                        setting_name.setText(username);
-
-                                        Date date = Calendar.getInstance().getTime();
-                                        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-                                        String strDate = dateFormat.format(date);
-                                        setting_time.setText(strDate);
-
-                                        AlertDialog alertDialog = new AlertDialog.Builder(SettingActivity.this).create();
-                                        alertDialog.setTitle("Notivce");
-                                        alertDialog.setMessage("Data was transferred successfully.");
-                                        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                                                new DialogInterface.OnClickListener() {
-                                                    public void onClick(DialogInterface dialog, int which) {
-                                                        dialog.dismiss();
-                                                    }
-                                                });
-                                        alertDialog.show();
-                                    } else {
-                                        loading.setVisibility(View.GONE);
-                                        Toast.makeText(SettingActivity.this, "Oops, Request failed.", Toast.LENGTH_LONG).show();
-                                    }
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        },
-                        new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                loading.setVisibility(View.GONE);
-                                System.out.println(error);
-                                Toast.makeText(SettingActivity.this, "It is currently offline.", Toast.LENGTH_LONG).show();
-                            }
-                        }){
-                    @Override
-                    protected Map<String, String> getParams()
-                    {
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("email", useremail);
-                        params.put("password", userpass);
-                        return params;
-                    }
-                };
-                queue = Volley.newRequestQueue(SettingActivity.this);
-                queue.add(postRequest);
-
+                for(int i = 0; i < groupkeyList.size(); i++){
+                    sendData(groupkeyList.get(i));
+                }
             }
         });
 
@@ -227,6 +178,74 @@ public class SettingActivity extends AppCompatActivity implements NavigationView
             }
         });
         navigationView.setItemIconTintList(null);
+    }
+
+    private void sendData(final String formid) {
+        String url = Common.getInstance().getSaveUrl();
+        StringRequest postRequest = new StringRequest(Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @RequiresApi(api = Build.VERSION_CODES.N)
+                    @Override
+                    public void onResponse(String response) {
+                        System.out.println(response);
+                        JSONObject jsonObject = null;
+                        try {
+                            jsonObject = new JSONObject(response);
+                            result = jsonObject.getString("success");
+                            if (result.equals("true")){
+                                loading.setVisibility(View.GONE);
+                                setting_email.setText(useremail);
+                                setting_name.setText(username);
+
+                                Date date = Calendar.getInstance().getTime();
+                                DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+                                String strDate = dateFormat.format(date);
+                                setting_time.setText(strDate);
+
+                                AlertDialog alertDialog = new AlertDialog.Builder(SettingActivity.this).create();
+                                alertDialog.setTitle("Notivce");
+                                alertDialog.setMessage("Data was transferred successfully.");
+                                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                dialog.dismiss();
+                                            }
+                                        });
+                                alertDialog.show();
+                            } else {
+                                loading.setVisibility(View.GONE);
+                                Toast.makeText(SettingActivity.this, "Oops, Request failed.", Toast.LENGTH_LONG).show();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        loading.setVisibility(View.GONE);
+                        System.out.println(error);
+                        Toast.makeText(SettingActivity.this, "It is currently offline.", Toast.LENGTH_LONG).show();
+                    }
+                }){
+
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("token", token);
+                return headers;
+            }
+
+            @Override
+            protected Map<String, String> getParams()
+            {
+                elementdata.get(formid).put("formId", formid);
+                return elementdata.get(formid);
+            }
+        };
+        queue = Volley.newRequestQueue(SettingActivity.this);
+        queue.add(postRequest);
     }
 
 

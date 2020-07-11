@@ -605,11 +605,7 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
                 GetElementValue();
                 System.out.println(element_data.size());
                 System.out.println(element_data);
-        for (Map.Entry<String, String> entry : element_data.entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-            insertData(key, value, formid);
-        }
+
         Intent intent = new Intent(FormActivity.this, SuccessActivity.class);
         intent.putExtra("FormId", formid);
         intent.putExtra("elementData", (Serializable) element_data);
@@ -1733,14 +1729,7 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private void insertData(String elementkye, String elementValue, String elementformid) {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(ElementValueDatabaeHelper.VCOL_2, elementkye);
-        contentValues.put(ElementValueDatabaeHelper.VCOL_3, elementValue);
-        contentValues.put(ElementValueDatabaeHelper.VCOL_4, elementformid);
-        System.out.println(contentValues);
-        VDb.insert(ElementValueDatabaeHelper.VTABLE_NAME,null,contentValues);
-    }
+
 }
 
 

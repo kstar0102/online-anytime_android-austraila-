@@ -3,24 +3,26 @@ package com.austraila.online_anytime.Common;
 public class Common {
     private String ApiKey = "?api_key=54d0a2c6b96b514cb47c3645714f7ce8";
     private String registerUrl = "register";
-    private String TestloginUrl = "http://192.168.107.90:89/login";
-    private String TestbaseUrl = "http://192.168.107.90:89/";
-    private String mainItemUrl = "forms";
-    private String formelementUrl = "http://192.168.107.90:89/form_elements/";
-    private String elemnetOptionUrl = "http://192.168.107.90:89/form_elements_options";
-    private String forgetUrl = "http://192.168.107.90:89/forget";
-    private String codeUrl = "http://192.168.107.90:89/forget/valid";
-    private String setpassUrl = "http://192.168.107.90:89/forget/setpassword";
-
-
-//    private String TestloginUrl = "http://online-anytime.com.au/olat/newapi/login";
-//    private String TestbaseUrl = "http://online-anytime.com.au/olat/newapi/";
+//    private String TestloginUrl = "http://192.168.107.90:89/login";
+//    private String TestbaseUrl = "http://192.168.107.90:89/";
 //    private String mainItemUrl = "forms";
-//    private String formelementUrl = "http://online-anytime.com.au/olat/newapi/form_elements/";
-//    private String elemnetOptionUrl = "http://online-anytime.com.au/olat/newapi/form_elements_options";
-//    private String forgetUrl = "http://online-anytime.com.au/olat/newapi/forget";
-//    private String codeUrl = "http://online-anytime.com.au/olat/newapi/forget/valid";
-//    private String setpassUrl = "http://online-anytime.com.au/olat/newapi/forget/setpassword";
+//    private String formelementUrl = "http://192.168.107.90:89/form_elements/";
+//    private String elemnetOptionUrl = "http://192.168.107.90:89/form_elements_options";
+//    private String forgetUrl = "http://192.168.107.90:89/forget";
+//    private String codeUrl = "http://192.168.107.90:89/forget/valid";
+//    private String setpassUrl = "http://192.168.107.90:89/forget/setpassword";
+//    private String saveUrl = "http://192.168.107.90:89/form/save";
+
+
+    private String TestloginUrl = "http://online-anytime.com.au/olat/newapi/login";
+    private String TestbaseUrl = "http://online-anytime.com.au/olat/newapi/";
+    private String mainItemUrl = "forms";
+    private String formelementUrl = "http://online-anytime.com.au/olat/newapi/form_elements/";
+    private String elemnetOptionUrl = "http://online-anytime.com.au/olat/newapi/form_elements_options";
+    private String forgetUrl = "http://online-anytime.com.au/olat/newapi/forget";
+    private String codeUrl = "http://online-anytime.com.au/olat/newapi/forget/valid";
+    private String setpassUrl = "http://online-anytime.com.au/olat/newapi/forget/setpassword";
+    private String saveUrl = "http://online-anytime.com.au/olat/newapi/form/save";
 
 
     private static Common instance = new Common();
@@ -56,6 +58,10 @@ public class Common {
     public String getCodeUrl() {return  codeUrl;}
 
     public String getSetpassUrl(){return setpassUrl;}
+
+    public String getSaveUrl(){
+        return saveUrl;
+    }
 
     public String[] countryArray ={
             "United States"
