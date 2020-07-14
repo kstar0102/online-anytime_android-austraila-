@@ -15,6 +15,7 @@ import androidx.annotation.Nullable;
 
 import com.austraila.online_anytime.R;
 import com.austraila.online_anytime.activitys.FormActivity;
+import com.austraila.online_anytime.activitys.cameraActivity.CameraActivity;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import java.io.File;
@@ -60,9 +61,13 @@ public class AddPhotoBottomDialogFragment extends BottomSheetDialogFragment {
         localIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent  intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType("*/*");
-                startActivityForResult(intent, 7);
+//                Intent  intent = new Intent(Intent.ACTION_GET_CONTENT);
+//                intent.setType("*/*");
+//                startActivityForResult(intent, 7);
+                Intent chooseFile = new Intent(Intent.ACTION_GET_CONTENT);
+                chooseFile.setType("*/*");
+                chooseFile = Intent.createChooser(chooseFile, "Choose a file");
+                startActivityForResult(chooseFile, 7);
             }
         });
 
@@ -77,11 +82,14 @@ public class AddPhotoBottomDialogFragment extends BottomSheetDialogFragment {
         switch(requestCode){
             case 7:
                 if(resultCode==RESULT_OK){
+                    Uri uri = data.getData();
+                    String src = uri.getPath();
+
                     Uri PathHolder = data.getData();
                     File file = new File(PathHolder.getPath());
                     String path = file.getAbsolutePath();
                     Intent intent = new Intent(getActivity(), FormActivity.class);
-                    intent.putExtra("filepath", path);
+                    intent.putExtra("filepath", src);
                     intent.putExtra("id", strtext);
                     intent.putExtra("des", formDes);
                     intent.putExtra("title", formtitle);
@@ -90,4 +98,5 @@ public class AddPhotoBottomDialogFragment extends BottomSheetDialogFragment {
                 break;
         }
     }
+
 }

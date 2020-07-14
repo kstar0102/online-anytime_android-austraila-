@@ -10,8 +10,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.Typeface;
 import android.icu.util.Calendar;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -49,10 +51,14 @@ import com.austraila.online_anytime.LocalManage.ElementOptionDatabaseHelper;
 import com.austraila.online_anytime.LocalManage.ElementValueDatabaeHelper;
 import com.austraila.online_anytime.R;
 import com.austraila.online_anytime.Common.AddPhotoBottomDialogFragment;
+import com.austraila.online_anytime.activitys.cameraActivity.CameraActivity;
 import com.austraila.online_anytime.activitys.signature.SignatureView;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -68,11 +74,13 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
     LinearLayout buttonsLayout;
     DatePickerDialog picker;
     SignatureView signatureView;
-    Bitmap photo;
+    Bitmap photo,bitmap;
     CustomScrollview customScrollview;
     Cursor cursor;
+    private Uri imageUri;
+    Bitmap thumbnail;
     static public String elementCameraId;
-    String  formid, formDes, formtitle, max, emailElementid, signauterElementid
+    String  formid, formDes, formtitle, max, emailElementid, signauterElementid, getfile, photoUri
             , numberElementid, singleElementid, dateElementid
             , phone1, phone2, phone3, phoneElementid
             , price1, price2, priceElemnetid
@@ -88,6 +96,7 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
     TextView next_btn;
 
     Map<String, String> element_data = new HashMap<String, String>();
+    static Map<String, String> element_filePath = new HashMap<String, String>();
     static Map<String, Bitmap> elementPhotos = new HashMap<String, Bitmap>();
 
     @SuppressLint("ResourceType")
@@ -123,17 +132,37 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         formDes = getIntent().getStringExtra("des");
         formtitle = getIntent().getStringExtra("title");
         String camera = intent.getStringExtra("camera");
-        Bitmap bitmap = (Bitmap) intent.getParcelableExtra("photoImage");
+
+        if(camera != null){
+            ContentValues values = new ContentValues();
+            imageUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+            Intent cInt = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            cInt.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+            startActivityForResult(cInt,Image_Capture_Code);
+        }
+
+        if(intent.getStringExtra("url") != null){
+            photoUri = intent.getStringExtra("url");
+            System.out.println(photoUri);
+            try {
+                bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), Uri.parse(photoUri));
+                System.out.println(bitmap);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+            bitmap = BitmapFactory.decodeStream(new ByteArrayInputStream(out.toByteArray()));
+        }
+        getfile = intent.getStringExtra("filepath");
+        element_filePath.put(elementCameraId, getfile);
 
         //get camera data.
         if (elementCameraId != null){
             elementPhotos.put(elementCameraId, bitmap);
         }
 
-        if(camera != null){
-            Intent cInt = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            startActivityForResult(cInt,Image_Capture_Code);
-        }
+
 
         //go back button
         TextView backTextView = findViewById(R.id.back_textview);
@@ -169,6 +198,27 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
 
         //show the element.
         showElement(checkpage);
+    }
+
+    public Bitmap getResizedBitmap(Bitmap bm, int maxSize) {
+        int width = bm.getWidth();
+        int height = bm.getHeight();
+
+        float bitmapRatio = (float)width / (float) height;
+        if (bitmapRatio > 0) {
+            width = maxSize;
+            height = (int) (width / bitmapRatio);
+        } else {
+            height = maxSize;
+            width = (int) (height * bitmapRatio);
+        }
+        Bitmap reduced_bitmap = Bitmap.createScaledBitmap(bm, width, height, true);
+//        if(sizeOf(reduced_bitmap) > (500 * 1000)) {
+//            return getResizedBitmap(reduced_bitmap, maxSize);
+//        } else {
+            return reduced_bitmap;
+//        }
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -796,9 +846,10 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == Image_Capture_Code) {
             if (resultCode == RESULT_OK) {
-                Bitmap bp = (Bitmap) data.getExtras().get("data");
+//                Bitmap bp = (Bitmap) data.getExtras().get("data");
                 Intent intent = new Intent(FormActivity.this, FormActivity.class);
-                intent.putExtra("photoImage", bp);
+                String imageurl = getRealPathFromURI(imageUri);
+                intent.putExtra("url", imageUri.toString());
                 intent.putExtra("id", formid);
                 intent.putExtra("des", formDes);
                 intent.putExtra("title", formtitle);
@@ -809,6 +860,14 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    public String getRealPathFromURI(Uri contentUri) {
+        String[] proj = { MediaStore.Images.Media.DATA };
+        Cursor cursor = managedQuery(contentUri, proj, null, null, null);
+        int column_index = cursor
+                .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        return cursor.getString(column_index);
+    }
     // file exploer funtion
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void fileUpload(String title, final String id) {
@@ -837,23 +896,20 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
         photoImageParam.setMargins(50,10,50,5);
-        photoImage.setMinimumHeight(500);
+        photoImage.setMinimumHeight(650);
+        photoImage.setMaxHeight(650);
         photoImage.setLayoutParams(photoImageParam);
-
+        photoImage.setVisibility(View.GONE);
         photoImage.setTag("element_" + id);
 
         TextView photofilepath = new TextView(this);
         titleTextview(photofilepath);
         photofilepath.setTextSize(getResources().getDimension(R.dimen.textsize_normal));
+        photofilepath.setTag("file" + "[element_" + id + "]");
         photofilepath.setVisibility(View.GONE);
 
         linearLayout.addView(photoImage);
         linearLayout.addView(photofilepath);
-
-        photo = elementPhotos.get("element_" + id);
-        if(photo != null){
-            photoImage.setImageBitmap(photo);
-        }
 
         uploadbtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -862,20 +918,26 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
                 bundle.putString("id", formid);
                 bundle.putString("formDes", formDes);
                 bundle.putString("formtitle", formtitle);
-                elementCameraId = "element_" +  id;
+                elementCameraId = "file" + "[element_" + id + "]";
                 AddPhotoBottomDialogFragment addPhotoBottomDialogFragment = AddPhotoBottomDialogFragment.newInstance();
                 addPhotoBottomDialogFragment.setArguments(bundle);
                 addPhotoBottomDialogFragment.show(getSupportFragmentManager(),"add_photo_dialog_fragment");
             }
         });
 
-        Intent intent = getIntent();
-        String getfile = intent.getStringExtra("filepath");
+        photo = elementPhotos.get("file" + "[element_" + id + "]");
+        if(photo != null){
 
-        if(getfile != null){
+
+            photoImage.setVisibility(View.VISIBLE);
+            photoImage.setImageBitmap(photo);
+        }
+
+        if(element_filePath.get("file" + "[element_" + id + "]") != null){
             photofilepath.setVisibility(View.VISIBLE);
             File file = new File(getfile);
             Bitmap myBitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+            elementPhotos.put("file" + "[element_" + id + "]", myBitmap);
             photofilepath.setText(getfile);
         }
     }

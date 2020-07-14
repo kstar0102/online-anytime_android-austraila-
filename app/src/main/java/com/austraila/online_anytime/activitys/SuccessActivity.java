@@ -61,6 +61,7 @@ public class SuccessActivity extends AppCompatActivity {
             String image = "data:image/png;base64," + toBase64(value);
             formData.put(key, image);
         }
+        System.out.println(formData);
 
 
         openHelper = new DatabaseHelper(this);
@@ -97,7 +98,6 @@ public class SuccessActivity extends AppCompatActivity {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        System.out.println(response);
                         JSONObject jsonObject = null;
                         try {
                             jsonObject = new JSONObject(response);
@@ -118,7 +118,7 @@ public class SuccessActivity extends AppCompatActivity {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        System.out.println(error);
+//                        System.out.println(error);
                         loading.setVisibility(View.GONE);
                         textView.setText("It is currently offline. All data saved local stroage.");
                         for (Map.Entry<String, String> entry : formData.entrySet()) {
@@ -161,7 +161,6 @@ public class SuccessActivity extends AppCompatActivity {
         contentValues.put(ElementValueDatabaeHelper.VCOL_2, elementkye);
         contentValues.put(ElementValueDatabaeHelper.VCOL_3, elementValue);
         contentValues.put(ElementValueDatabaeHelper.VCOL_4, elementformid);
-        System.out.println(contentValues);
         VDb.insert(ElementValueDatabaeHelper.VTABLE_NAME,null,contentValues);
     }
 }
