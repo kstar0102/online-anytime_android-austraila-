@@ -1,10 +1,12 @@
 package com.austraila.online_anytime.activitys;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -43,6 +45,8 @@ import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.austraila.online_anytime.Common.Common;
 import com.austraila.online_anytime.Common.CustomScrollview;
@@ -78,7 +82,6 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
     CustomScrollview customScrollview;
     Cursor cursor;
     private Uri imageUri;
-    Bitmap thumbnail;
     static public String elementCameraId;
     String  formid, formDes, formtitle, max, emailElementid, signauterElementid, getfile, photoUri
             , numberElementid, singleElementid, dateElementid
@@ -89,7 +92,6 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
             , textareaElemnet, timeElemntid, webElementid;
 
     private SQLiteDatabase db,ODb,VDb;
-    int ss = 0;
     private SQLiteOpenHelper openHelper,ElementOptionopenHelper, ElementValueopenHeloer;
     ArrayList<String> data = new ArrayList<String>();
     public int checkpage = 1;
@@ -133,6 +135,14 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         formtitle = getIntent().getStringExtra("title");
         String camera = intent.getStringExtra("camera");
 
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) ==
+                PackageManager.PERMISSION_GRANTED) {
+        }
+        else {
+            ActivityCompat.requestPermissions(this, new String[]
+                    { Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE }, 0);
+        }
+
         if(camera != null){
             ContentValues values = new ContentValues();
             imageUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
@@ -146,6 +156,7 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
             System.out.println(photoUri);
             try {
                 bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), Uri.parse(photoUri));
+                elementPhotos.put(elementCameraId, bitmap);
                 System.out.println(bitmap);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -154,13 +165,14 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
             bitmap = BitmapFactory.decodeStream(new ByteArrayInputStream(out.toByteArray()));
         }
+
         getfile = intent.getStringExtra("filepath");
         element_filePath.put(elementCameraId, getfile);
 
         //get camera data.
-        if (elementCameraId != null){
-            elementPhotos.put(elementCameraId, bitmap);
-        }
+//        if (elementCameraId != null){
+//            elementPhotos.put(elementCameraId, bitmap);
+//        }
 
 
 
@@ -198,27 +210,6 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
 
         //show the element.
         showElement(checkpage);
-    }
-
-    public Bitmap getResizedBitmap(Bitmap bm, int maxSize) {
-        int width = bm.getWidth();
-        int height = bm.getHeight();
-
-        float bitmapRatio = (float)width / (float) height;
-        if (bitmapRatio > 0) {
-            width = maxSize;
-            height = (int) (width / bitmapRatio);
-        } else {
-            height = maxSize;
-            width = (int) (height * bitmapRatio);
-        }
-        Bitmap reduced_bitmap = Bitmap.createScaledBitmap(bm, width, height, true);
-//        if(sizeOf(reduced_bitmap) > (500 * 1000)) {
-//            return getResizedBitmap(reduced_bitmap, maxSize);
-//        } else {
-            return reduced_bitmap;
-//        }
-
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -729,7 +720,6 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         signview.setTag("element_" + id);
         signauterElementid = "element_" + id;
 
-
         this.buttonsLayout = this.buttonsLayout();
         this.signatureView = new SignatureView(this);
         signatureView.setBackground(getResources().getDrawable(R.drawable.editview_border));
@@ -793,8 +783,13 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
 
         // save the signature
         if (tag.equalsIgnoreCase("save")) {
-            elementPhotos.put(signauterElementid, this.signatureView.getSignature());
-            this.saveImage(this.signatureView.getSignature());
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            bitmap = this.signatureView.getSignature();
+            System.out.println(bitmap);
+//            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+//            bitmap = BitmapFactory.decodeStream(new ByteArrayInputStream(out.toByteArray()));
+            elementPhotos.put(signauterElementid, bitmap);
+//            this.saveImage(this.signatureView.getSignature());
             customScrollview.setEnableScrolling(true);
         }
 
@@ -848,7 +843,6 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
             if (resultCode == RESULT_OK) {
 //                Bitmap bp = (Bitmap) data.getExtras().get("data");
                 Intent intent = new Intent(FormActivity.this, FormActivity.class);
-                String imageurl = getRealPathFromURI(imageUri);
                 intent.putExtra("url", imageUri.toString());
                 intent.putExtra("id", formid);
                 intent.putExtra("des", formDes);
@@ -860,14 +854,7 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    public String getRealPathFromURI(Uri contentUri) {
-        String[] proj = { MediaStore.Images.Media.DATA };
-        Cursor cursor = managedQuery(contentUri, proj, null, null, null);
-        int column_index = cursor
-                .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-        cursor.moveToFirst();
-        return cursor.getString(column_index);
-    }
+
     // file exploer funtion
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void fileUpload(String title, final String id) {
@@ -935,9 +922,12 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
 
         if(element_filePath.get("file" + "[element_" + id + "]") != null){
             photofilepath.setVisibility(View.VISIBLE);
-            File file = new File(getfile);
-            Bitmap myBitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
-            elementPhotos.put("file" + "[element_" + id + "]", myBitmap);
+            try {
+                bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), Uri.parse(getfile));
+                elementPhotos.put("file" + "[element_" + id + "]", bitmap);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             photofilepath.setText(getfile);
         }
     }

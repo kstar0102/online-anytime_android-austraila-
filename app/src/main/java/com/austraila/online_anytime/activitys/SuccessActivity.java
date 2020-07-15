@@ -54,15 +54,13 @@ public class SuccessActivity extends AppCompatActivity {
         Intent intent = getIntent();
         formData = (HashMap<String, String>)intent.getSerializableExtra("elementData");
         formid = intent.getStringExtra("FormId");
-
         for (Map.Entry<String, Bitmap> entry : FormActivity.elementPhotos.entrySet()) {
             String key = entry.getKey();
             Bitmap value = entry.getValue();
             String image = "data:image/png;base64," + toBase64(value);
             formData.put(key, image);
         }
-        System.out.println(formData);
-
+//        System.out.println(formData);
 
         openHelper = new DatabaseHelper(this);
         ElementValueopenHeloer = new ElementValueDatabaeHelper(this);
@@ -71,7 +69,6 @@ public class SuccessActivity extends AppCompatActivity {
 
         final Cursor cursor = db.rawQuery("SELECT *FROM " + DatabaseHelper.TABLE_NAME,  null);
         if(cursor != null){
-            Log.e("TAGtotal", String.valueOf(cursor.getCount()));
             if (cursor.moveToFirst()){
                 do{
                     Token = cursor.getString(cursor.getColumnIndex("token"));
@@ -118,7 +115,7 @@ public class SuccessActivity extends AppCompatActivity {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-//                        System.out.println(error);
+                        System.out.println(error);
                         loading.setVisibility(View.GONE);
                         textView.setText("It is currently offline. All data saved local stroage.");
                         for (Map.Entry<String, String> entry : formData.entrySet()) {
@@ -151,7 +148,7 @@ public class SuccessActivity extends AppCompatActivity {
 
     public String toBase64(Bitmap bitmap) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
         byte[] byteArray = byteArrayOutputStream .toByteArray();
         return Base64.encodeToString(byteArray, Base64.DEFAULT);
     }

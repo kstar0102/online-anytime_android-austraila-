@@ -51,7 +51,6 @@ public class CameraActivity extends AppCompatActivity {
                     if (resultCode == Activity.RESULT_OK) {
                         try {
                             thumbnail = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
-                            imgCapture.setImageBitmap(thumbnail);
                             String imageurl = getRealPathFromURI(imageUri);
                         } catch (Exception e) {
                             e.printStackTrace();
