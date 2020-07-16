@@ -103,6 +103,7 @@ public class SuccessActivity extends AppCompatActivity {
                                 loading.setVisibility(View.GONE);
                                 textView.setText(getResources().getString(R.string.success));
                                 FormActivity.elementPhotos.clear();
+                                FormActivity.element_data.clear();
                             } else {
                                 loading.setVisibility(View.GONE);
                                 textView.setText("false");

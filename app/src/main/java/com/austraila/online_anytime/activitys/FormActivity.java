@@ -97,9 +97,13 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
     public int checkpage = 1;
     TextView next_btn;
 
-    Map<String, String> element_data = new HashMap<String, String>();
+    static Map<String, String> element_data = new HashMap<String, String>();
     static Map<String, String> element_filePath = new HashMap<String, String>();
     static Map<String, Bitmap> elementPhotos = new HashMap<String, Bitmap>();
+
+    static ArrayList<String> sigleElementArray = new ArrayList<String>();
+    static ArrayList<String> numberElementArray = new ArrayList<String>();
+    static ArrayList<String> emailElementArray = new ArrayList<String>();
 
     @SuppressLint("ResourceType")
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -168,13 +172,6 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
 
         getfile = intent.getStringExtra("filepath");
         element_filePath.put(elementCameraId, getfile);
-
-        //get camera data.
-//        if (elementCameraId != null){
-//            elementPhotos.put(elementCameraId, bitmap);
-//        }
-
-
 
         //go back button
         TextView backTextView = findViewById(R.id.back_textview);
@@ -400,6 +397,7 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         // set the radio group
         final RadioGroup radioGroup = new RadioGroup(this);
         radioGroup.setOrientation(LinearLayout.HORIZONTAL);
+        radioGroup.setTag("element_" + id);
         LinearLayout.LayoutParams radiogroupparams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -418,6 +416,9 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
                     Toast.makeText(FormActivity.this, radioButtonView.getText().toString(), Toast.LENGTH_LONG).show();
                 }
             });
+        }
+        if(element_data.get("element_" + id) != null){
+            ((RadioButton)radioGroup.getChildAt(Integer.parseInt(element_data.get("element_" + id)))).setChecked(true);
         }
 
         itemLayout.addView(radioGroup);
@@ -643,6 +644,9 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         submitBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                sigleElementArray.clear();
+                numberElementArray.clear();
+                emailElementArray.clear();
                 GetElementValue();
                 System.out.println(element_data.size());
                 System.out.println(element_data);
@@ -800,42 +804,6 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    final void saveImage(Bitmap signature) {
-
-        String root = Environment.getExternalStorageDirectory().toString();
-
-        // the directory where the signature will be saved
-        File myDir = new File(root + "/saved_signature");
-
-        // make the directory if it does not exist yet
-        if (!myDir.exists()) {
-            myDir.mkdirs();
-        }
-
-        // set the file name of your choice
-        String fname = "signature.png";
-
-        // in our case, we delete the previous file, you can remove this
-        File file = new File(myDir, fname);
-        if (file.exists()) {
-            file.delete();
-        }
-
-        try {
-
-            // save the signature
-            FileOutputStream out = new FileOutputStream(file);
-            signature.compress(Bitmap.CompressFormat.PNG, 90, out);
-            out.flush();
-            out.close();
-
-            Toast.makeText(FormActivity.this, "Signature saved.", Toast.LENGTH_LONG).show();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         super.onActivityResult(requestCode, resultCode, data);
@@ -906,6 +874,7 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
                 bundle.putString("formDes", formDes);
                 bundle.putString("formtitle", formtitle);
                 elementCameraId = "file" + "[element_" + id + "]";
+                GetElementValue();
                 AddPhotoBottomDialogFragment addPhotoBottomDialogFragment = AddPhotoBottomDialogFragment.newInstance();
                 addPhotoBottomDialogFragment.setArguments(bundle);
                 addPhotoBottomDialogFragment.show(getSupportFragmentManager(),"add_photo_dialog_fragment");
@@ -1105,7 +1074,9 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.spinner_dropdown_item, dropList);
         adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         dropdown.setAdapter(adapter);
+        dropdown.setTag("element_" + dropid);
         linearLayout.addView(dropdown);
+
         dropdown.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -1114,12 +1085,14 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
                 // Notify the selected item text
 //                Toast.makeText(getApplicationContext(), "Selected : " + selectedItemText, Toast.LENGTH_SHORT).show();
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
 
             }
         });
+        if(element_data.get("element_" + dropid) != null){
+            dropdown.setSelection(Integer.parseInt(element_data.get("element_" + dropid)));
+        }
 
     }
 
@@ -1149,9 +1122,17 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         );
         ParmsDescription.setMargins(50,10,50,0);
 
+
         for(int i = 0; i < mylist.size(); i ++){
-            element_data.put("element_" + id + "_" + String.valueOf(i+1), "0");
             final CheckBox checkBox = new CheckBox(this);
+            if(element_data.get("element_" + id + "_" + String.valueOf(i+1)) != null){
+                if(Integer.parseInt(element_data.get("element_" + id + "_" + String.valueOf(i+1))) == 1){
+                    checkBox.setChecked(true);
+                }
+            }
+//            element_data.put("element_" + id + "_" + String.valueOf(i+1), "0");
+
+            checkBox.setTag("element_" + id + "_" + String.valueOf(i+1));
             checkBox.setText(mylist.get(i));
             checkBox.setTextColor(getResources().getColor(R.color.colorPrimaryDark));
             checkBox.setTextSize(getResources().getDimension(R.dimen.textsize_normal));
@@ -1165,7 +1146,6 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
                 }
             });
             linearLayout.addView(checkBox);
-            //doi se. il hal lae.haw/na seng nat e.o. ne mu ja ju seng nae ni kka i jen mu sep ji ana.mam dae lo hae.sure.bye.
         }
     }
 
@@ -1186,6 +1166,8 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         numberEdit.setInputType(InputType.TYPE_CLASS_NUMBER);
         numberEdit.setTag("element_" + id);
         numberElementid = "element_" + id;
+        numberElementArray.add("element_" + id);
+
         String num = element_data.get(numberElementid);
         if(num != null){
             numberEdit.setText(num);
@@ -1362,6 +1344,9 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onClick(View v) {
+                sigleElementArray.clear();
+                numberElementArray.clear();
+                emailElementArray.clear();
                 linearLayout.removeAllViewsInLayout();
                 showElement(showcheckbtn +1 );
             }
@@ -1371,10 +1356,13 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onClick(View v) {
+                sigleElementArray.clear();
+                numberElementArray.clear();
+                emailElementArray.clear();
                 GetElementValue();
                 linearLayout.removeAllViewsInLayout();
                 showElement(showcheckbtn +1 );
-                System.out.println(elementPhotos);
+                System.out.println(element_data);
             }
 
         });
@@ -1383,6 +1371,10 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onClick(View v) {
+                sigleElementArray.clear();
+                numberElementArray.clear();
+                emailElementArray.clear();
+                GetElementValue();
                 linearLayout.removeAllViewsInLayout();
                 showElement(showcheckbtn - 1 );
             }
@@ -1453,24 +1445,27 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
     public void SingleLineTest (String title, String id){
         // define the textview and Edittext
         TextView textView =  new TextView(this);
-        EditText editText = new EditText(this);
+        EditText editTexttest = new EditText(this);
 
         // set text in textview.
         textView.setText(Html.fromHtml(title));
 
         //set property
         titleTextview(textView);
-        EditTextview(editText);
-        editText.setTag("element_" + id);
+        EditTextview(editTexttest);
+        editTexttest.setTag("element_" + id);
         singleElementid = "element_" + id;
-        String single = element_data.get(singleElementid);
+        sigleElementArray.add("element_" + id);
+
+
+        String single = element_data.get("element_" + id);
         if(single != null){
-            editText.setText(single);
+            editTexttest.setText(single);
         }
 
         // add the element
         linearLayout.addView(textView);
-        linearLayout.addView(editText);
+        linearLayout.addView(editTexttest);
     }
 
     public void emailLine (String title, String id){
@@ -1486,6 +1481,8 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         EditTextview(editText);
         editText.setTag("element_" + id);
         emailElementid = "element_" + id;
+        emailElementArray.add("element_" + id);
+
         String email = element_data.get(emailElementid);
         if(email != null){
             editText.setText(email);
@@ -1545,6 +1542,9 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
 
         // set property the radiogroup
         radioGroup.setOrientation(LinearLayout.VERTICAL);
+        radioGroup.setTag("element_" + id);
+
+
         LinearLayout.LayoutParams radiogroupparams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -1567,6 +1567,9 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
                 }
             });
             radioGroup.addView(radioButtonView, radiogroupparams);
+        }
+        if(element_data.get("element_" + id) != null){
+            ((RadioButton)radioGroup.getChildAt(Integer.parseInt(element_data.get("element_" + id)))).setChecked(true);
         }
 
         //add the title and radiogroup
@@ -1668,116 +1671,145 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
 
     private void GetElementValue() {
         if(numberElementid != null){
-            EditText numberedit = linearLayout.findViewWithTag(numberElementid);
-            element_data.put(numberElementid, numberedit.getText().toString());
-            linearLayout.removeView(numberedit);
-            numberElementid =null;
+            for(int i = 0; i < numberElementArray.size(); i ++) {
+                if(numberElementArray.get(i) != null){
+                    try{
+                        EditText numberedit = linearLayout.findViewWithTag(numberElementArray.get(i));
+                        element_data.put(numberElementArray.get(i), numberedit.getText().toString());
+                        linearLayout.removeView(numberedit);
+                    }catch (Exception e){
+                    }
+                }
+            }
         }
 
         if(singleElementid != null){
-            EditText editText = linearLayout.findViewWithTag(singleElementid);
-            element_data.put(singleElementid, editText.getText().toString());
-            linearLayout.removeView(editText);
-            singleElementid = null;
+            for(int i = 0; i < sigleElementArray.size(); i ++){
+                try{
+                    EditText singleeditText = linearLayout.findViewWithTag(sigleElementArray.get(i));
+                    element_data.put(sigleElementArray.get(i), singleeditText.getText().toString());
+                    linearLayout.removeView(singleeditText);
+                }catch (Exception e){
+                }
+            }
         }
 
         if(emailElementid != null){
-            EditText editText = linearLayout.findViewWithTag(emailElementid);
-            element_data.put(emailElementid, editText.getText().toString());
-            linearLayout.removeView(editText);
-            emailElementid = null;
+            for(int i = 0; i < emailElementArray.size(); i ++) {
+                try {
+                    EditText editText = linearLayout.findViewWithTag(emailElementArray.get(i));
+                    element_data.put(emailElementArray.get(i), editText.getText().toString());
+                    linearLayout.removeView(editText);
+                }catch (Exception e){}
+            }
         }
 
         if(dateElementid != null){
-            EditText editText = linearLayout.findViewWithTag(dateElementid);
-            element_data.put(dateElementid, editText.getText().toString());
-            linearLayout.removeView(editText);
-            dateElementid = null;
+            try {
+                EditText editText = linearLayout.findViewWithTag(dateElementid);
+                element_data.put(dateElementid, editText.getText().toString());
+                linearLayout.removeView(editText);
+                dateElementid = null;
+            }catch (Exception e){}
         }
 
         if(phone1 != null || phone2 != null || phone3 != null){
-            EditText ph1 = linearLayout.findViewWithTag(phone1);
-            EditText ph2 = linearLayout.findViewWithTag(phone2);
-            EditText ph3 = linearLayout.findViewWithTag(phone3);
-            element_data.put(phoneElementid, ph1.getText().toString() + ph2.getText().toString() + ph3.getText().toString());
-            linearLayout.removeView(ph1);
-            linearLayout.removeView(ph2);
-            linearLayout.removeView(ph3);
-            phone1 = null;
-            phone2 = null;
-            phone3 = null;
+            try {
+                EditText ph1 = linearLayout.findViewWithTag(phone1);
+                EditText ph2 = linearLayout.findViewWithTag(phone2);
+                EditText ph3 = linearLayout.findViewWithTag(phone3);
+                element_data.put(phoneElementid, ph1.getText().toString() + ph2.getText().toString() + ph3.getText().toString());
+                linearLayout.removeView(ph1);
+                linearLayout.removeView(ph2);
+                linearLayout.removeView(ph3);
+                phone1 = null;
+                phone2 = null;
+                phone3 = null;
+            }catch (Exception e){}
         }
 
         if(price1 != null || price2 != null){
-            EditText pric1 = linearLayout.findViewWithTag(price1);
-            EditText pric2 = linearLayout.findViewWithTag(price2);
-            element_data.put(priceElemnetid, pric1.getText().toString() + "." + pric2.getText().toString());
-            linearLayout.removeView(pric1);
-            linearLayout.removeView(pric1);
-            price1 = null;
-            price2 = null;
+            try {
+                EditText pric1 = linearLayout.findViewWithTag(price1);
+                EditText pric2 = linearLayout.findViewWithTag(price2);
+                element_data.put(priceElemnetid, pric1.getText().toString() + "." + pric2.getText().toString());
+                linearLayout.removeView(pric1);
+                linearLayout.removeView(pric1);
+                price1 = null;
+                price2 = null;
+            }catch (Exception e){}
         }
 
         if(firstnameElementid != null || secondnameElementid != null){
-            EditText firstname = linearLayout.findViewWithTag(firstnameElementid);
-            EditText lastname = linearLayout.findViewWithTag(secondnameElementid);
-            element_data.put(firstnameElementid, firstname.getText().toString());
-            element_data.put(secondnameElementid, lastname.getText().toString());
-            linearLayout.removeView(firstname);
-            linearLayout.removeView(lastname);
-            firstnameElementid = null;
-            secondnameElementid = null;
+            try{
+                EditText firstname = linearLayout.findViewWithTag(firstnameElementid);
+                EditText lastname = linearLayout.findViewWithTag(secondnameElementid);
+                element_data.put(firstnameElementid, firstname.getText().toString());
+                element_data.put(secondnameElementid, lastname.getText().toString());
+                linearLayout.removeView(firstname);
+                linearLayout.removeView(lastname);
+                firstnameElementid = null;
+                secondnameElementid = null;
+            }catch (Exception e){}
 
         }
 
         if(addressElement1 != null || addressElement3 != null){
-            EditText ad1 = linearLayout.findViewWithTag(addressElement1);
-            if(addressElement2 != null){
-                EditText ad2 = linearLayout.findViewWithTag(addressElement2);
-                if(ad2.getText().toString().equals("")){
-                    Toast.makeText(FormActivity.this, "Please enter a Address Line 2.", Toast.LENGTH_LONG).show();
-                    return;
+            try {
+                EditText ad1 = linearLayout.findViewWithTag(addressElement1);
+                if(addressElement2 != null){
+                    EditText ad2 = linearLayout.findViewWithTag(addressElement2);
+                    if(ad2.getText().toString().equals("")){
+                        Toast.makeText(FormActivity.this, "Please enter a Address Line 2.", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    element_data.put(addressElement2, ad2.getText().toString());
+                    linearLayout.removeView(ad2);
+                    addressElement2 = null;
                 }
-                element_data.put(addressElement2, ad2.getText().toString());
-                linearLayout.removeView(ad2);
-                addressElement2 = null;
-            }
-            EditText ad3 = linearLayout.findViewWithTag(addressElement3);
-            EditText ad4 = linearLayout.findViewWithTag(addressElement4);
-            EditText ad5 = linearLayout.findViewWithTag(addressElement5);
-            element_data.put(addressElement1, ad1.getText().toString());
-            element_data.put(addressElement3, ad3.getText().toString());
-            element_data.put(addressElement4, ad4.getText().toString());
-            element_data.put(addressElement5, ad5.getText().toString());
-            linearLayout.removeView(ad1);
-            linearLayout.removeView(ad3);
-            linearLayout.removeView(ad4);
-            linearLayout.removeView(ad5);
-            addressElement1 = null;
-            addressElement3 = null;
-            addressElement4 = null;
-            addressElement5 = null;
+                EditText ad3 = linearLayout.findViewWithTag(addressElement3);
+                EditText ad4 = linearLayout.findViewWithTag(addressElement4);
+                EditText ad5 = linearLayout.findViewWithTag(addressElement5);
+                element_data.put(addressElement1, ad1.getText().toString());
+                element_data.put(addressElement3, ad3.getText().toString());
+                element_data.put(addressElement4, ad4.getText().toString());
+                element_data.put(addressElement5, ad5.getText().toString());
+                linearLayout.removeView(ad1);
+                linearLayout.removeView(ad3);
+                linearLayout.removeView(ad4);
+                linearLayout.removeView(ad5);
+                addressElement1 = null;
+                addressElement3 = null;
+                addressElement4 = null;
+                addressElement5 = null;
+            }catch (Exception e){}
         }
 
         if(textareaElemnet != null){
-            EditText editText = linearLayout.findViewWithTag(textareaElemnet);
-            element_data.put(textareaElemnet, editText.getText().toString());
-            linearLayout.removeView(editText);
-            textareaElemnet = null;
+            try {
+                EditText editText = linearLayout.findViewWithTag(textareaElemnet);
+                element_data.put(textareaElemnet, editText.getText().toString());
+                linearLayout.removeView(editText);
+                textareaElemnet = null;
+            }catch (Exception e){}
         }
 
         if(timeElemntid != null){
-            EditText timeeditText = linearLayout.findViewWithTag(timeElemntid);
-            element_data.put(timeElemntid, timeeditText.getText().toString());
-            linearLayout.removeView(timeeditText);
-            timeElemntid = null;
+            try {
+                EditText timeeditText = linearLayout.findViewWithTag(timeElemntid);
+                element_data.put(timeElemntid, timeeditText.getText().toString());
+                linearLayout.removeView(timeeditText);
+                timeElemntid = null;
+            }catch (Exception e){}
         }
 
         if(webElementid != null){
-            EditText editText = linearLayout.findViewWithTag(webElementid);
-            element_data.put(webElementid,editText.getText().toString());
-            linearLayout.removeView(editText);
-            webElementid = null;
+            try {
+                EditText editText = linearLayout.findViewWithTag(webElementid);
+                element_data.put(webElementid,editText.getText().toString());
+                linearLayout.removeView(editText);
+                webElementid = null;
+            }catch (Exception e){}
         }
     }
 
