@@ -73,7 +73,7 @@ import java.util.Map;
 import static com.austraila.online_anytime.activitys.cameraActivity.CameraActivity.Image_Capture_Code;
 
 
-public class FormActivity extends AppCompatActivity implements View.OnClickListener  {
+public class FormActivity extends AppCompatActivity   {
     LinearLayout linearLayout;
     LinearLayout buttonsLayout;
     DatePickerDialog picker;
@@ -724,7 +724,7 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         signview.setTag("element_" + id);
         signauterElementid = "element_" + id;
 
-        this.buttonsLayout = this.buttonsLayout();
+        this.buttonsLayout = this.buttonsLayout("element_" + id);
         this.signatureView = new SignatureView(this);
         signatureView.setBackground(getResources().getDrawable(R.drawable.editview_border));
 
@@ -750,17 +750,17 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         linearLayout.addView(signview);
     }
 
-    private LinearLayout buttonsLayout() {
+    private LinearLayout buttonsLayout(final String id) {
         // create the UI programatically
         LinearLayout linearLayout = new LinearLayout(this);
         Button saveBtn = new Button(this);
         Button clearBtn = new Button(this);
+        final ImageView signImg = new ImageView(this);
 
         // set orientation
         linearLayout.setOrientation(LinearLayout.HORIZONTAL);
         LinearLayout.LayoutParams buttonlayoutParm = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
+                LinearLayout.LayoutParams.WRAP_CONTENT, 200
         );
         buttonlayoutParm.setMargins(50,0,10,0);
         linearLayout.setLayoutParams(buttonlayoutParm);
@@ -768,40 +768,39 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
         // set texts, tags and OnClickListener
         saveBtn.setText("Save");
         saveBtn.setTag("Save");
-        saveBtn.setOnClickListener(this);
+        saveBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                bitmap = signatureView.getSignature();
+                signImg.setImageBitmap(bitmap);
+                elementPhotos.put(signauterElementid, bitmap);
+                customScrollview.setEnableScrolling(true);
+            }
+        });
 
         clearBtn.setText("Clear");
         clearBtn.setTag("Clear");
-        clearBtn.setOnClickListener(this);
+        clearBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                signImg.setImageResource(0);
+                signatureView.clearSignature();
+                customScrollview.setEnableScrolling(true);
+            }
+        });
+
+        signImg.setTag(id);
+        if(elementPhotos.get(id) != null){
+            signImg.setImageBitmap(elementPhotos.get(id));
+        }
 
         linearLayout.addView(saveBtn);
         linearLayout.addView(clearBtn);
+        linearLayout.addView(signImg);
 
         // return the whoe layout
         return linearLayout;
-    }
-
-    @Override
-    public void onClick(View v) {
-        String tag = v.getTag().toString().trim();
-
-        // save the signature
-        if (tag.equalsIgnoreCase("save")) {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            bitmap = this.signatureView.getSignature();
-            System.out.println(bitmap);
-//            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
-//            bitmap = BitmapFactory.decodeStream(new ByteArrayInputStream(out.toByteArray()));
-            elementPhotos.put(signauterElementid, bitmap);
-//            this.saveImage(this.signatureView.getSignature());
-            customScrollview.setEnableScrolling(true);
-        }
-
-        // empty the canvas
-        else {
-            this.signatureView.clearSignature();
-            customScrollview.setEnableScrolling(true);
-        }
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -821,7 +820,6 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
     }
-
 
     // file exploer funtion
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -893,7 +891,7 @@ public class FormActivity extends AppCompatActivity implements View.OnClickListe
             photofilepath.setVisibility(View.VISIBLE);
             try {
                 bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), Uri.parse(getfile));
-                elementPhotos.put("file" + "[element_" + id + "]", bitmap);
+//                elementPhotos.put("file" + "[element_" + id + "]", bitmap);
             } catch (IOException e) {
                 e.printStackTrace();
             }
