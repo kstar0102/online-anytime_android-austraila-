@@ -53,14 +53,17 @@ public class SuccessActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         formData = (HashMap<String, String>)intent.getSerializableExtra("elementData");
+        System.out.println(formData);
         formid = intent.getStringExtra("FormId");
+        System.out.println(FormActivity.elementPhotos);
         for (Map.Entry<String, Bitmap> entry : FormActivity.elementPhotos.entrySet()) {
             String key = entry.getKey();
             Bitmap value = entry.getValue();
+            System.out.println(key);
+            System.out.println(value);
             String image = "data:image/png;base64," + toBase64(value);
             formData.put(key, image);
         }
-//        System.out.println(formData);
 
         openHelper = new DatabaseHelper(this);
         ElementValueopenHeloer = new ElementValueDatabaeHelper(this);

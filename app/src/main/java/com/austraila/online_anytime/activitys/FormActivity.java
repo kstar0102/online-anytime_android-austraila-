@@ -100,11 +100,12 @@ public class FormActivity extends AppCompatActivity   {
     static Map<String, String> element_data = new HashMap<String, String>();
     static Map<String, String> element_filePath = new HashMap<String, String>();
     static Map<String, Bitmap> elementPhotos = new HashMap<String, Bitmap>();
+    static Map<String, SignatureView> signEles = new HashMap<String, SignatureView>();
 
     static ArrayList<String> sigleElementArray = new ArrayList<String>();
     static ArrayList<String> numberElementArray = new ArrayList<String>();
     static ArrayList<String> emailElementArray = new ArrayList<String>();
-
+    static ArrayList<String> signElementArray = new ArrayList<String>();
     @SuppressLint("ResourceType")
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
@@ -157,11 +158,11 @@ public class FormActivity extends AppCompatActivity   {
 
         if(intent.getStringExtra("url") != null){
             photoUri = intent.getStringExtra("url");
-            System.out.println(photoUri);
+//            System.out.println(photoUri);
             try {
                 bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), Uri.parse(photoUri));
                 elementPhotos.put(elementCameraId, bitmap);
-                System.out.println(bitmap);
+//                System.out.println(bitmap);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -300,6 +301,8 @@ public class FormActivity extends AppCompatActivity   {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(FormActivity.this, SuccessActivity.class);
+                    intent.putExtra("FormId", formid);
+                    intent.putExtra("elementData", (Serializable) element_data);
                     startActivity(intent);
                 }
             });
@@ -706,7 +709,7 @@ public class FormActivity extends AppCompatActivity   {
         linearLayout.addView(websiteEdit);
     }
 
-    private void SignatureMainLayout(String title, String id) {
+    private void SignatureMainLayout(String title, final String id) {
         //set signature title
         TextView signTitle = new TextView(this);
         titleTextview(signTitle);
@@ -721,10 +724,8 @@ public class FormActivity extends AppCompatActivity   {
         signview.setLayoutParams(signviewParma);
         signview.setOrientation(LinearLayout.VERTICAL);
         signview.setMinimumHeight(500);
-        signview.setTag("element_" + id);
-        signauterElementid = "element_" + id;
 
-        this.buttonsLayout = this.buttonsLayout("element_" + id);
+
         this.signatureView = new SignatureView(this);
         signatureView.setBackground(getResources().getDrawable(R.drawable.editview_border));
 
@@ -743,68 +744,75 @@ public class FormActivity extends AppCompatActivity   {
         signatureViewParams.setMargins(50,15,50,5);
         signatureView.setMinimumHeight(300);
         signatureView.setLayoutParams(signatureViewParams);
-        signview.addView(buttonsLayout);
-        signview.addView(signatureView);
+        signatureView.setTag("element_" + id);
+        singleElementid = "element_" + id;
+        signEles.put("element_" + id, signatureView);
+        signElementArray.add("element_" + id);
 
-        linearLayout.addView(signTitle);
-        linearLayout.addView(signview);
-    }
-
-    private LinearLayout buttonsLayout(final String id) {
-        // create the UI programatically
-        LinearLayout linearLayout = new LinearLayout(this);
+        final LinearLayout blinearLayout = new LinearLayout(this);
         Button saveBtn = new Button(this);
         Button clearBtn = new Button(this);
         final ImageView signImg = new ImageView(this);
+//        final TextView txt = new TextView(this);
+
+        Bitmap sigBit = elementPhotos.get("element_" + id);
+        if(sigBit != null){
+            signImg.setImageBitmap(sigBit);
+//            txt.setText("  It has already been saved..");
+        }
 
         // set orientation
-        linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+        blinearLayout.setOrientation(LinearLayout.HORIZONTAL);
         LinearLayout.LayoutParams buttonlayoutParm = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT, 200
         );
         buttonlayoutParm.setMargins(50,0,10,0);
-        linearLayout.setLayoutParams(buttonlayoutParm);
+        blinearLayout.setLayoutParams(buttonlayoutParm);
 
         // set texts, tags and OnClickListener
         saveBtn.setText("Save");
-        saveBtn.setTag("Save");
         saveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                SignatureView signatureView  = signEles.get("element_" + id);
                 bitmap = signatureView.getSignature();
                 signImg.setImageBitmap(bitmap);
-                elementPhotos.put(signauterElementid, bitmap);
+                elementPhotos.put("element_" + id, bitmap);
                 customScrollview.setEnableScrolling(true);
             }
         });
 
         clearBtn.setText("Clear");
-        clearBtn.setTag("Clear");
         clearBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 signImg.setImageResource(0);
+                SignatureView signatureView  = signEles.get("element_" + id);
                 signatureView.clearSignature();
                 customScrollview.setEnableScrolling(true);
             }
         });
 
-        signImg.setTag(id);
-        if(elementPhotos.get(id) != null){
-            signImg.setImageBitmap(elementPhotos.get(id));
-        }
+        blinearLayout.addView(saveBtn);
+        blinearLayout.addView(clearBtn);
+        blinearLayout.addView(signImg);
+        signview.addView(signatureView);
+        signview.addView(blinearLayout);
 
-        linearLayout.addView(saveBtn);
-        linearLayout.addView(clearBtn);
-        linearLayout.addView(signImg);
 
-        // return the whoe layout
-        return linearLayout;
+        linearLayout.addView(signTitle);
+        linearLayout.addView(signview);
     }
 
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+//    private LinearLayout buttonsLayout(final String id) {
+//
+//        // create the UI programatically
+//
+//
+//        return blinearLayout;
+//    }
 
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == Image_Capture_Code) {
             if (resultCode == RESULT_OK) {
@@ -873,6 +881,7 @@ public class FormActivity extends AppCompatActivity   {
                 bundle.putString("formtitle", formtitle);
                 elementCameraId = "file" + "[element_" + id + "]";
                 GetElementValue();
+                signElementArray.clear();
                 AddPhotoBottomDialogFragment addPhotoBottomDialogFragment = AddPhotoBottomDialogFragment.newInstance();
                 addPhotoBottomDialogFragment.setArguments(bundle);
                 addPhotoBottomDialogFragment.show(getSupportFragmentManager(),"add_photo_dialog_fragment");
@@ -881,8 +890,6 @@ public class FormActivity extends AppCompatActivity   {
 
         photo = elementPhotos.get("file" + "[element_" + id + "]");
         if(photo != null){
-
-
             photoImage.setVisibility(View.VISIBLE);
             photoImage.setImageBitmap(photo);
         }
@@ -1345,6 +1352,8 @@ public class FormActivity extends AppCompatActivity   {
                 sigleElementArray.clear();
                 numberElementArray.clear();
                 emailElementArray.clear();
+                signElementArray.clear();
+                GetElementValue();
                 linearLayout.removeAllViewsInLayout();
                 showElement(showcheckbtn +1 );
             }
@@ -1357,6 +1366,7 @@ public class FormActivity extends AppCompatActivity   {
                 sigleElementArray.clear();
                 numberElementArray.clear();
                 emailElementArray.clear();
+                signElementArray.clear();
                 GetElementValue();
                 linearLayout.removeAllViewsInLayout();
                 showElement(showcheckbtn +1 );
@@ -1372,6 +1382,7 @@ public class FormActivity extends AppCompatActivity   {
                 sigleElementArray.clear();
                 numberElementArray.clear();
                 emailElementArray.clear();
+                signElementArray.clear();
                 GetElementValue();
                 linearLayout.removeAllViewsInLayout();
                 showElement(showcheckbtn - 1 );
