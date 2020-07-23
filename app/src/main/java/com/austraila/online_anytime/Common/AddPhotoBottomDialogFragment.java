@@ -1,9 +1,11 @@
 package com.austraila.online_anytime.Common;
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,6 +29,7 @@ import static com.austraila.online_anytime.activitys.cameraActivity.CameraActivi
 public class AddPhotoBottomDialogFragment extends BottomSheetDialogFragment {
     TextView photoIcon, localIcon;
     String strtext,formDes,formtitle, elementId;
+    private Uri imageUri;
 
     public static AddPhotoBottomDialogFragment newInstance() {
         return new AddPhotoBottomDialogFragment();
@@ -61,9 +64,6 @@ public class AddPhotoBottomDialogFragment extends BottomSheetDialogFragment {
         localIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                Intent  intent = new Intent(Intent.ACTION_GET_CONTENT);
-//                intent.setType("*/*");
-//                startActivityForResult(intent, 7);
                 Intent chooseFile = new Intent(Intent.ACTION_GET_CONTENT);
                 chooseFile.setType("*/*");
                 chooseFile = Intent.createChooser(chooseFile, "Choose a file");

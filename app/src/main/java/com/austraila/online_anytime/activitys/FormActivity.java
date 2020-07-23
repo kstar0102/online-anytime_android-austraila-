@@ -75,7 +75,6 @@ import static com.austraila.online_anytime.activitys.cameraActivity.CameraActivi
 
 public class FormActivity extends AppCompatActivity   {
     LinearLayout linearLayout;
-    LinearLayout buttonsLayout;
     DatePickerDialog picker;
     SignatureView signatureView;
     Bitmap photo,bitmap;
@@ -105,7 +104,7 @@ public class FormActivity extends AppCompatActivity   {
     static ArrayList<String> sigleElementArray = new ArrayList<String>();
     static ArrayList<String> numberElementArray = new ArrayList<String>();
     static ArrayList<String> emailElementArray = new ArrayList<String>();
-    static ArrayList<String> signElementArray = new ArrayList<String>();
+
     @SuppressLint("ResourceType")
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
@@ -158,11 +157,9 @@ public class FormActivity extends AppCompatActivity   {
 
         if(intent.getStringExtra("url") != null){
             photoUri = intent.getStringExtra("url");
-//            System.out.println(photoUri);
             try {
                 bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), Uri.parse(photoUri));
                 elementPhotos.put(elementCameraId, bitmap);
-//                System.out.println(bitmap);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -747,7 +744,6 @@ public class FormActivity extends AppCompatActivity   {
         signatureView.setTag("element_" + id);
         singleElementid = "element_" + id;
         signEles.put("element_" + id, signatureView);
-        signElementArray.add("element_" + id);
 
         final LinearLayout blinearLayout = new LinearLayout(this);
         Button saveBtn = new Button(this);
@@ -804,14 +800,6 @@ public class FormActivity extends AppCompatActivity   {
         linearLayout.addView(signview);
     }
 
-//    private LinearLayout buttonsLayout(final String id) {
-//
-//        // create the UI programatically
-//
-//
-//        return blinearLayout;
-//    }
-
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == Image_Capture_Code) {
@@ -840,7 +828,7 @@ public class FormActivity extends AppCompatActivity   {
         //define the button.
         Button uploadbtn = new Button(this);
         LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(500, LinearLayout.LayoutParams.WRAP_CONTENT);
-        btnParams.setMargins(50,25,50,10);
+        btnParams.setMargins(50,25,50,0);
         uploadbtn.setLayoutParams(btnParams);
         uploadbtn.setBackground(getDrawable(R.drawable.btn_rounded));
         uploadbtn.setText("Select File");
@@ -856,9 +844,7 @@ public class FormActivity extends AppCompatActivity   {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        photoImageParam.setMargins(50,10,50,5);
-        photoImage.setMinimumHeight(650);
-        photoImage.setMaxHeight(650);
+        photoImageParam.setMargins(50,0,50,0);
         photoImage.setLayoutParams(photoImageParam);
         photoImage.setVisibility(View.GONE);
         photoImage.setTag("element_" + id);
@@ -881,7 +867,6 @@ public class FormActivity extends AppCompatActivity   {
                 bundle.putString("formtitle", formtitle);
                 elementCameraId = "file" + "[element_" + id + "]";
                 GetElementValue();
-                signElementArray.clear();
                 AddPhotoBottomDialogFragment addPhotoBottomDialogFragment = AddPhotoBottomDialogFragment.newInstance();
                 addPhotoBottomDialogFragment.setArguments(bundle);
                 addPhotoBottomDialogFragment.show(getSupportFragmentManager(),"add_photo_dialog_fragment");
@@ -898,7 +883,7 @@ public class FormActivity extends AppCompatActivity   {
             photofilepath.setVisibility(View.VISIBLE);
             try {
                 bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), Uri.parse(getfile));
-//                elementPhotos.put("file" + "[element_" + id + "]", bitmap);
+                elementPhotos.put("file" + "[element_" + id + "]", bitmap);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -1352,7 +1337,6 @@ public class FormActivity extends AppCompatActivity   {
                 sigleElementArray.clear();
                 numberElementArray.clear();
                 emailElementArray.clear();
-                signElementArray.clear();
                 GetElementValue();
                 linearLayout.removeAllViewsInLayout();
                 showElement(showcheckbtn +1 );
@@ -1366,7 +1350,6 @@ public class FormActivity extends AppCompatActivity   {
                 sigleElementArray.clear();
                 numberElementArray.clear();
                 emailElementArray.clear();
-                signElementArray.clear();
                 GetElementValue();
                 linearLayout.removeAllViewsInLayout();
                 showElement(showcheckbtn +1 );
@@ -1382,7 +1365,6 @@ public class FormActivity extends AppCompatActivity   {
                 sigleElementArray.clear();
                 numberElementArray.clear();
                 emailElementArray.clear();
-                signElementArray.clear();
                 GetElementValue();
                 linearLayout.removeAllViewsInLayout();
                 showElement(showcheckbtn - 1 );
@@ -1821,7 +1803,6 @@ public class FormActivity extends AppCompatActivity   {
             }catch (Exception e){}
         }
     }
-
 
 }
 

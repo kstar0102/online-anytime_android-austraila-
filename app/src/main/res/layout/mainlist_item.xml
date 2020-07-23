@@ -9,12 +9,14 @@
         android:orientation="horizontal">
 
         <ImageView
+            android:layout_weight="1"
             android:layout_marginLeft="10dp"
-            android:layout_width="25dp"
+            android:layout_width="30dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:src="@drawable/main_doc_image"/>
         <TextView
+            android:layout_weight="1"
             android:id="@+id/listitem_title"
             android:layout_margin="10dp"
             android:layout_gravity="center"
@@ -24,8 +26,9 @@
             android:textSize="16dp"
             android:text="@string/forget_display"/>
         <ImageView
+            android:layout_weight="1"
             android:layout_gravity="center"
-            android:layout_width="25dp"
+            android:layout_width="30dp"
             android:layout_marginRight="10dp"
             android:layout_height="wrap_content"
             android:src="@drawable/eye_icon"/>
