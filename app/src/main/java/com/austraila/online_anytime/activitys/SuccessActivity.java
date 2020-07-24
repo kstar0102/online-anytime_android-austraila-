@@ -1,6 +1,7 @@
 package com.austraila.online_anytime.activitys;
 
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -15,6 +16,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.AuthFailureError;
@@ -55,14 +57,23 @@ public class SuccessActivity extends AppCompatActivity {
         formData = (HashMap<String, String>)intent.getSerializableExtra("elementData");
         System.out.println(formData);
         formid = intent.getStringExtra("FormId");
-        System.out.println(FormActivity.elementPhotos);
-        for (Map.Entry<String, Bitmap> entry : FormActivity.elementPhotos.entrySet()) {
+
+        try {for (Map.Entry<String, Bitmap> entry : FormActivity.elementPhotos.entrySet()) {
             String key = entry.getKey();
             Bitmap value = entry.getValue();
-            System.out.println(key);
-            System.out.println(value);
             String image = "data:image/png;base64," + toBase64(value);
             formData.put(key, image);
+        }}catch (Exception e){
+            AlertDialog alertDialog = new AlertDialog.Builder(SuccessActivity.this).create();
+            alertDialog.setTitle("Catch the error");
+            alertDialog.setMessage("The formData add the Photo error:" + e.getMessage());
+            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialog.show();
         }
 
         openHelper = new DatabaseHelper(this);

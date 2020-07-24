@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     JSONArray ElemnetList = new JSONArray();
     JSONArray ElemnetOptionList = new JSONArray();
     SearchView searchView;
-    String useremail, result, checksum, token;
+    String useremail, result, checksum, token, userepass;
     CustomAdapter myAdapter;
     RequestQueue queue;
     ArrayList<String> listFormId = new ArrayList<String>();
@@ -110,17 +110,82 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             fcursor.close();
         }
 
-        init();
+
 
         reloadBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, MainActivity.class);
-                startActivity(intent);
+                loading.setVisibility(View.VISIBLE);
+                final Cursor cursor = db.rawQuery("SELECT *FROM " + DatabaseHelper.TABLE_NAME,  null);
+                if(cursor != null){
+                    if (cursor.moveToFirst()){
+                        do{
+                            useremail = cursor.getString(cursor.getColumnIndex("Gmail"));
+                            userepass = cursor.getString(cursor.getColumnIndex("Password"));
+                        }while(cursor.moveToNext());
+                    }
+                    cursor.close();
+                }
+
+                String url = Common.getInstance().getBaseURL() + Common.getInstance().getApiKey();
+                StringRequest postRequest = new StringRequest(Request.Method.POST, url,
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                System.out.println(response);
+                                JSONObject jsonObject = null;
+                                try {
+                                    jsonObject = new JSONObject(response);
+                                    result = jsonObject.getString("success");
+                                    if (result.equals("true")){
+
+                                        Db.execSQL("delete from "+ FormDatabaeHelper.FORMTABLE_NAME);
+                                        EDb.execSQL("delete from "+ ElementDatabaseHelper.ElEMENTTABLE_NAME);
+                                        ODb.execSQL("delete from "+ ElementOptionDatabaseHelper.OPTIONTABLE_NAME);
+                                        Intent intent = new Intent(MainActivity.this, MainActivity.class);
+                                        startActivity(intent);
+                                    } else {
+                                        loading.setVisibility(View.GONE);
+                                        Toast.makeText(MainActivity.this, "Oops, can't login! please try to login again.", Toast.LENGTH_LONG).show();
+                                    }
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        },
+                        new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                loading.setVisibility(View.GONE);
+                                System.out.println(error);
+                                Toast.makeText(MainActivity.this, "It is currently offline.", Toast.LENGTH_LONG).show();
+                            }
+                        }){
+                    @Override
+                    protected Map<String, String> getParams()
+                    {
+                        Map<String, String> params = new HashMap<String, String>();
+                        params.put("email", useremail);
+                        params.put("password", userepass);
+                        return params;
+                    }
+                };
+                queue = Volley.newRequestQueue(MainActivity.this);
+                queue.add(postRequest);
             }
         });
 
+        Cursor Ccursor = Db.rawQuery("SELECT *FROM " + FormDatabaeHelper.FORMTABLE_NAME,  null);
+        System.out.println(Ccursor.getCount());
+        if(Ccursor.getCount() == 0){
+            init();
+        }else {
+            ListviewManagement();
+        }
+
         sideMenu_mangement();
+        listView.setTextFilterEnabled(true);
+        setupSearchView();
     }
 
 
@@ -135,7 +200,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         jsonObject = new JSONObject(response);
                         result = jsonObject.getString("success");
                         if (result.equals("true")){
-//                            loading.setVisibility(View.GONE);
                             ElemnetList = jsonObject.getJSONArray("forms");
                             for(int j = 0; j < ElemnetList.length(); j++){
                                 insertElementData(ElemnetList.getJSONObject(j).getString("element_id")
@@ -160,9 +224,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-//                    loading.setVisibility(View.GONE);
-
-//                    sideMenu_mangement();
                     System.out.println(error);
                     Toast.makeText(MainActivity.this, "It is currently offline.", Toast.LENGTH_LONG).show();
                 }
@@ -199,7 +260,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                         ,ElemnetOptionList.getJSONObject(j).getString("option_is_default"));
                             }
                         } else {
-//                            loading.setVisibility(View.GONE);
                             Toast.makeText(MainActivity.this, "Oops, Request failed..", Toast.LENGTH_LONG).show();
                         }
                     } catch (JSONException e) {
@@ -209,9 +269,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-//                    loading.setVisibility(View.GONE);
-//                    ListviewManagement();
-//                    sideMenu_mangement();
                     System.out.println(error);
                     Toast.makeText(MainActivity.this, "It is currently offline.", Toast.LENGTH_LONG).show();
                 }
@@ -228,6 +285,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void init() {
+
         //Connect the Api
         String url = Common.getInstance().getMainItemUrl();
         StringRequest postRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
@@ -279,7 +337,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             public void run() {
                                 loading.setVisibility(View.GONE);
                             }
-                        }, 50);
+                        }, 1000);
                         Toast.makeText(MainActivity.this, "Oops, can't login! please try to login again.", Toast.LENGTH_LONG).show();
                     }
                 } catch (JSONException e) {
@@ -304,9 +362,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         };
         queue = Volley.newRequestQueue(MainActivity.this);
         queue.add(postRequest);
-
-        listView.setTextFilterEnabled(true);
-        setupSearchView();
+        elementOptionSave();
     }
 
     private void sideMenu_mangement() {
@@ -372,6 +428,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }while(fcursor.moveToNext());
         }
         fcursor.close();
+
         for(int i = 0; i < data.size(); i++){
             Listitem.add(new Listmodel(data.get(i)));
         }
@@ -389,6 +446,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 startActivity(intent);
             }
         });
+        loading.setVisibility(View.GONE);
     }
 
     private void setupSearchView()

@@ -644,13 +644,18 @@ public class FormActivity extends AppCompatActivity   {
         submitBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sigleElementArray.clear();
-                numberElementArray.clear();
-                emailElementArray.clear();
+                if (!sigleElementArray.isEmpty()) {
+                    sigleElementArray.clear();
+                }
+                if(!numberElementArray.isEmpty()){
+                    numberElementArray.clear();
+                }
+                if(!emailElementArray.isEmpty()){
+                    emailElementArray.clear();
+                }
                 GetElementValue();
-                System.out.println(element_data.size());
-                System.out.println(element_data);
-
+//                System.out.println(element_data.size());
+//                System.out.println(element_data);
         Intent intent = new Intent(FormActivity.this, SuccessActivity.class);
         intent.putExtra("FormId", formid);
         intent.putExtra("elementData", (Serializable) element_data);
@@ -712,7 +717,7 @@ public class FormActivity extends AppCompatActivity   {
         titleTextview(signTitle);
         signTitle.setText(Html.fromHtml(title));
 
-        LinearLayout signview = new LinearLayout(this);
+        final LinearLayout signview = new LinearLayout(this);
         LinearLayout.LayoutParams signviewParma = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -721,7 +726,6 @@ public class FormActivity extends AppCompatActivity   {
         signview.setLayoutParams(signviewParma);
         signview.setOrientation(LinearLayout.VERTICAL);
         signview.setMinimumHeight(500);
-
 
         this.signatureView = new SignatureView(this);
         signatureView.setBackground(getResources().getDrawable(R.drawable.editview_border));
@@ -745,16 +749,21 @@ public class FormActivity extends AppCompatActivity   {
         singleElementid = "element_" + id;
         signEles.put("element_" + id, signatureView);
 
+        final ImageView imageView = new ImageView(this);
+        imageView.setLayoutParams(signatureViewParams);
+        imageView.setMinimumWidth(300);
+
         final LinearLayout blinearLayout = new LinearLayout(this);
         Button saveBtn = new Button(this);
         Button clearBtn = new Button(this);
-        final ImageView signImg = new ImageView(this);
 //        final TextView txt = new TextView(this);
 
         Bitmap sigBit = elementPhotos.get("element_" + id);
         if(sigBit != null){
-            signImg.setImageBitmap(sigBit);
-//            txt.setText("  It has already been saved..");
+            imageView.setImageBitmap(sigBit);
+            signatureView.setVisibility(View.GONE);
+        }else {
+            imageView.setVisibility(View.GONE);
         }
 
         // set orientation
@@ -772,7 +781,6 @@ public class FormActivity extends AppCompatActivity   {
             public void onClick(View v) {
                 SignatureView signatureView  = signEles.get("element_" + id);
                 bitmap = signatureView.getSignature();
-                signImg.setImageBitmap(bitmap);
                 elementPhotos.put("element_" + id, bitmap);
                 customScrollview.setEnableScrolling(true);
             }
@@ -782,19 +790,20 @@ public class FormActivity extends AppCompatActivity   {
         clearBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                signImg.setImageResource(0);
                 SignatureView signatureView  = signEles.get("element_" + id);
                 signatureView.clearSignature();
                 customScrollview.setEnableScrolling(true);
+                imageView.setVisibility(View.GONE);
+                signatureView.setVisibility(View.VISIBLE);
             }
         });
 
         blinearLayout.addView(saveBtn);
         blinearLayout.addView(clearBtn);
-        blinearLayout.addView(signImg);
+
+        signview.addView(imageView);
         signview.addView(signatureView);
         signview.addView(blinearLayout);
-
 
         linearLayout.addView(signTitle);
         linearLayout.addView(signview);
@@ -827,9 +836,10 @@ public class FormActivity extends AppCompatActivity   {
 
         //define the button.
         Button uploadbtn = new Button(this);
-        LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(500, LinearLayout.LayoutParams.WRAP_CONTENT);
+        LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         btnParams.setMargins(50,25,50,0);
         uploadbtn.setLayoutParams(btnParams);
+        uploadbtn.setPadding(100,5,100,5);
         uploadbtn.setBackground(getDrawable(R.drawable.btn_rounded));
         uploadbtn.setText("Select File");
         uploadbtn.setTextColor(getResources().getColor(R.color.white_color));
@@ -840,11 +850,8 @@ public class FormActivity extends AppCompatActivity   {
 
         //define the Imageview
         ImageView photoImage = new ImageView(this);
-        LinearLayout.LayoutParams photoImageParam = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
-        photoImageParam.setMargins(50,0,50,0);
+        LinearLayout.LayoutParams photoImageParam = new LinearLayout.LayoutParams(500,400);
+        photoImageParam.setMargins(50,10,50,0);
         photoImage.setLayoutParams(photoImageParam);
         photoImage.setVisibility(View.GONE);
         photoImage.setTag("element_" + id);
@@ -1436,7 +1443,7 @@ public class FormActivity extends AppCompatActivity   {
     public void SingleLineTest (String title, String id){
         // define the textview and Edittext
         TextView textView =  new TextView(this);
-        EditText editTexttest = new EditText(this);
+        final EditText editTexttest = new EditText(this);
 
         // set text in textview.
         textView.setText(Html.fromHtml(title));

@@ -59,7 +59,6 @@ public class LoginActivity extends AppCompatActivity{
                     Toast.makeText(LoginActivity.this, "Enter your Email and Password to login", Toast.LENGTH_SHORT).show();
                     return;
                 }else {
-//                    String url = "http://192.168.107.90:89/login?api_key=54d0a2c6b96b514cb47c3645714f7ce8";
                     String url = Common.getInstance().getBaseURL() + Common.getInstance().getApiKey();
                     StringRequest postRequest = new StringRequest(Request.Method.POST, url,
                             new Response.Listener<String>() {
