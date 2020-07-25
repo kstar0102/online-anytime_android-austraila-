@@ -362,7 +362,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         };
         queue = Volley.newRequestQueue(MainActivity.this);
         queue.add(postRequest);
-        elementOptionSave();
+//        elementOptionSave();
     }
 
     private void sideMenu_mangement() {
@@ -398,6 +398,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.sidebar_course:
+                        Intent intent_main = new Intent(MainActivity.this, MainActivity.class);
+                        startActivity(intent_main);
                         return true;
 
                     case R.id.sidebar_setting:

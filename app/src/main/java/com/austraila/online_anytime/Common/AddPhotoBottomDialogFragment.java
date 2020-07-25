@@ -1,6 +1,7 @@
 package com.austraila.online_anytime.Common;
 
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 
 import com.austraila.online_anytime.R;
 import com.austraila.online_anytime.activitys.FormActivity;
@@ -50,14 +52,26 @@ public class AddPhotoBottomDialogFragment extends BottomSheetDialogFragment {
             @Override
             public void onClick(View v) {
 //                Toast.makeText(getContext(), "photo", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(getActivity(), FormActivity.class);
+                try {Intent intent = new Intent(getActivity(), FormActivity.class);
                 intent.putExtra("camera", "camera");
                 intent.putExtra("id", strtext);
                 intent.putExtra("des", formDes);
                 intent.putExtra("title", formtitle);
                 intent.putExtra("elementid", elementId);
+                Toast.makeText(getContext(), elementId, Toast.LENGTH_LONG).show();
                 startActivity(intent);
-                dismiss();
+                dismiss();}catch (Exception e){
+                    AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
+                    alertDialog.setTitle("Catch the error");
+                    alertDialog.setMessage("The camera url add the Photo error:" + e.getMessage());
+                    alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            });
+                    alertDialog.show();
+                }
             }
         });
 

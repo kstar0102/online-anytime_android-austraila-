@@ -8,7 +8,7 @@
     >
     <ImageView
         android:layout_marginTop="20dp"
-        android:layout_width="150dp"
+        android:layout_width="140dp"
         android:layout_height="130dp"
         android:src="@drawable/app_logo"/>
     <TextView
@@ -16,9 +16,9 @@
         android:layout_height="wrap_content"
         android:text="@string/header_title"
         android:layout_gravity="bottom"
-        android:textSize="20dp"
+        android:textSize="18dp"
         android:textStyle="bold"
         android:textColor="@color/colorBackground"
-        android:layout_marginLeft="10dp"/>
+        android:layout_marginLeft="5dp"/>
 
 </LinearLayout>

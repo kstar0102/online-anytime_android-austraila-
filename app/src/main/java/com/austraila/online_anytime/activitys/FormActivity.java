@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -44,6 +45,7 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -139,6 +141,9 @@ public class FormActivity extends AppCompatActivity   {
         formtitle = getIntent().getStringExtra("title");
         String camera = intent.getStringExtra("camera");
 
+        TextView title = findViewById(R.id.headerTitle);
+        title.setText(formtitle);
+
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) ==
                 PackageManager.PERMISSION_GRANTED) {
         }
@@ -148,24 +153,51 @@ public class FormActivity extends AppCompatActivity   {
         }
 
         if(camera != null){
+            try{
             ContentValues values = new ContentValues();
             imageUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
             Intent cInt = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             cInt.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
             startActivityForResult(cInt,Image_Capture_Code);
+            }
+            catch (Exception e){
+//                AlertDialog alertDialog = new AlertDialog.Builder(FormActivity.this).create();
+//                alertDialog.setTitle("Catch the error");
+//                alertDialog.setMessage("The camera intend add the Photo error:" + e.getMessage());
+//                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+//                        new DialogInterface.OnClickListener() {
+//                            public void onClick(DialogInterface dialog, int which) {
+//                                dialog.dismiss();
+//                            }
+//                        });
+//                alertDialog.show();
+            }
+            intent.putExtra("camera", "null");
         }
 
         if(intent.getStringExtra("url") != null){
-            photoUri = intent.getStringExtra("url");
-            try {
-                bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), Uri.parse(photoUri));
-                elementPhotos.put(elementCameraId, bitmap);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            try {photoUri = intent.getStringExtra("url");
+                try {
+                    bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), Uri.parse(photoUri));
+                    elementPhotos.put(elementCameraId, bitmap);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
             bitmap = BitmapFactory.decodeStream(new ByteArrayInputStream(out.toByteArray()));
+            }catch (Exception e){
+                AlertDialog alertDialog = new AlertDialog.Builder(FormActivity.this).create();
+                alertDialog.setTitle("Catch the error");
+                alertDialog.setMessage("The camera url add the Photo error:" + e.getMessage());
+                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                alertDialog.show();
+            }
         }
 
         getfile = intent.getStringExtra("filepath");
@@ -634,7 +666,7 @@ public class FormActivity extends AppCompatActivity   {
     private void submitButton() {
         Button submitBtn =new Button(this);
         LinearLayout.LayoutParams btnparams = new LinearLayout.LayoutParams(300,110);
-        btnparams.setMargins(50,20,10,5);
+        btnparams.setMargins(50,20,10,20);
         submitBtn.setBackground(getResources().getDrawable(R.drawable.btn_submit));
         submitBtn.setText("Submit");
         submitBtn.setTextColor(getResources().getColor(R.color.white_color));
@@ -810,8 +842,9 @@ public class FormActivity extends AppCompatActivity   {
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == Image_Capture_Code) {
+        try{
+            super.onActivityResult(requestCode, resultCode, data);
+            if (requestCode == Image_Capture_Code) {
             if (resultCode == RESULT_OK) {
 //                Bitmap bp = (Bitmap) data.getExtras().get("data");
                 Intent intent = new Intent(FormActivity.this, FormActivity.class);
@@ -823,6 +856,18 @@ public class FormActivity extends AppCompatActivity   {
             } else if (resultCode == RESULT_CANCELED) {
                 Toast.makeText(FormActivity.this, "Cancelled", Toast.LENGTH_LONG).show();
             }
+        }
+        }catch (Exception e){
+            AlertDialog alertDialog = new AlertDialog.Builder(FormActivity.this).create();
+            alertDialog.setTitle("Catch the error");
+            alertDialog.setMessage("The camera activityresult add the Photo error:" + e.getMessage());
+            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialog.show();
         }
     }
 
@@ -933,7 +978,7 @@ public class FormActivity extends AppCompatActivity   {
                         new DatePickerDialog.OnDateSetListener() {
                             @Override
                             public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                                dateEditText.setText(year + "-" + (monthOfYear + 1) + "-" + dayOfMonth);
+                                dateEditText.setText(dayOfMonth + "-" + (monthOfYear + 1) + "-" + year);
                             }
                         }, year, month, day);
                 picker.show();
@@ -1320,12 +1365,11 @@ public class FormActivity extends AppCompatActivity   {
 
         Button nextbutton = new Button(this);
         Button prebutton =new Button(this);
-        LinearLayout.LayoutParams btnparams = new LinearLayout.LayoutParams(300, 120);
+        LinearLayout.LayoutParams btnparams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         btnparams.setMargins(10,20,10,5);
 
         nextbutton.setText("Continue");
         nextbutton.setLayoutParams(btnparams);
-
 
         prebutton.setText("Previous");
         prebutton.setLayoutParams(btnparams);

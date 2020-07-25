@@ -80,7 +80,7 @@ public class SettingActivity extends AppCompatActivity implements NavigationView
         VDb = ElementValueHelper.getReadableDatabase();
 
         //get Form element data from local database.
-        final Cursor Vcursor = VDb.rawQuery("SELECT *FROM " + ElementValueDatabaeHelper.VTABLE_NAME,  null);
+        try{final Cursor Vcursor = VDb.rawQuery("SELECT *FROM " + ElementValueDatabaeHelper.VTABLE_NAME,  null);
         if(Vcursor != null){
             if (Vcursor.moveToFirst()){
                 do{
@@ -93,6 +93,17 @@ public class SettingActivity extends AppCompatActivity implements NavigationView
                 }while(Vcursor.moveToNext());
             }
             Vcursor.close();
+        }}catch (Exception e){
+            AlertDialog alertDialog = new AlertDialog.Builder(SettingActivity.this).create();
+            alertDialog.setTitle("Catch the error");
+            alertDialog.setMessage("The setting add the Photo error:" + e.getMessage());
+            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialog.show();
         }
 
         System.out.println(elementdata.get(formId));
